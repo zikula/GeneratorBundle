@@ -91,11 +91,11 @@ EOT
             }
         }
 
-        $namespace = Validators::validateModuleNamespace($input->getOption('namespace'));
+        $namespace = Validators::validateBundleNamespace($input->getOption('namespace'));
         if (!$module = $input->getOption('module-name')) {
             $module = strtr($namespace, array('\\' => ''));
         }
-        $module = Validators::validateModuleName($module);
+        $module = Validators::validateBundleName($module);
         $dir = Validators::validateTargetDir($input->getOption('dir'), $module, $namespace);
         if (null === $input->getOption('format')) {
             $input->setOption('format', 'annotation');
@@ -130,7 +130,7 @@ EOT
         // namespace
         $namespace = null;
         try {
-            $namespace = $input->getOption('namespace') ? Validators::validateModuleNamespace($input->getOption('namespace')) : null;
+            $namespace = $input->getOption('namespace') ? Validators::validateBundleNamespace($input->getOption('namespace')) : null;
         } catch (\Exception $error) {
             $output->writeln($dialog->getHelperSet()->get('formatter')->formatBlock($error->getMessage(), 'error'));
         }
@@ -161,7 +161,7 @@ EOT
         // module name
         $module = null;
         try {
-            $module = $input->getOption('module-name') ? Validators::validateModuleName($input->getOption('module-name')) : null;
+            $module = $input->getOption('module-name') ? Validators::validateBundleName($input->getOption('module-name')) : null;
         } catch (\Exception $error) {
             $output->writeln($dialog->getHelperSet()->get('formatter')->formatBlock($error->getMessage(), 'error'));
         }
