@@ -69,7 +69,7 @@ class BundleGenerator extends Generator
         $this->renderFile('bundle/phpunit.xml.dist.twig', $dir.'/phpunit.xml.dist', $parameters);
         $this->renderFile('bundle/README.md.twig', $dir.'/README.md', $parameters);
         $this->renderFile('bundle/LICENSE-'.$license.'.twig', $dir.'/LICENSE.md', $parameters);
-        $this->renderFile('bundle/gettext.pot.twig', $dir.'/Resources/locale/'.strtolower($bundle).'.pot');
+        $this->renderFile('bundle/gettext.pot.twig', $dir.'/Resources/locale/'.strtolower($bundle).'.pot', $parameters);
 //        $this->renderFile('bundle/Extension.php.twig', $dir.'/DependencyInjection/'.$basename.'Extension.php', $parameters);
 //        $this->renderFile('bundle/Configuration.php.twig', $dir.'/DependencyInjection/Configuration.php', $parameters);
         $this->renderFile('bundle/DefaultController.php.twig', $dir.'/Controller/DefaultController.php', $parameters);

@@ -110,10 +110,10 @@ EOT
         $output->writeln('Generating the module code: <info>OK</info>');
 
         $errors = array();
-        $runner = $dialog->getRunner($output, $errors);
+        //$runner = $dialog->getRunner($output, $errors);
 
         // routing
-        $runner($this->updateRouting($dialog, $input, $output, $bundle, $format));
+        //$runner($this->updateRouting($dialog, $input, $output, $bundle, $format));
 
         $dialog->writeGeneratorSummary($output, $errors);
     }
