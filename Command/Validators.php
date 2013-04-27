@@ -20,13 +20,13 @@ class Validators
 {
     public static function validateBundleNamespace($namespace)
     {
-        if (!preg_match('/Module$/', $namespace)) {
-            throw new \InvalidArgumentException('The namespace must end with Module.');
-        }
-
         $namespace = strtr($namespace, '/', '\\');
         if (!preg_match('/^(?:[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*\\\?)+$/', $namespace)) {
             throw new \InvalidArgumentException('The namespace contains invalid characters.');
+        }
+
+        if (!preg_match('/Module$/', $namespace)) {
+            throw new \InvalidArgumentException('The namespace must end with Module.');
         }
 
         // validate reserved keywords
@@ -53,10 +53,6 @@ class Validators
     {
         if (!preg_match('/Module$/', $bundle)) {
             throw new \InvalidArgumentException('The module name must end with Module.');
-        }
-        
-        if (!preg_match('/Bundle$/', $bundle)) {
-            throw new \InvalidArgumentException('The bundle name must end with Bundle.');
         }
 
         return $bundle;
