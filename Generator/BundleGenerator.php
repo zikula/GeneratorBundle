@@ -60,8 +60,8 @@ class BundleGenerator extends Generator
             'extension_alias'  => Container::underscore($basename),
         );
 
-        $this->filesystem->copy('bundle/.gitignore', $dir.'/.gitignore');
-        $this->filesystem->copy('bundle/.travis.yml', $dir.'/.travis.yml');
+        $this->renderFile('bundle/.gitignore.twig', $dir.'/.gitignore', $parameters);
+        $this->renderFile('bundle/.travis.yml.twig', $dir.'/.travis.yml', $parameters);
         $this->renderFile('bundle/composer.json.twig', $dir.'/composer.json', $parameters);
         $this->renderFile('bundle/Module.php.twig', $dir.'/'.$bundle.'.php', $parameters);
         $this->renderFile('bundle/Version.php.twig', $dir.'/'.$bundleName.'Version.php', $parameters);
@@ -69,7 +69,7 @@ class BundleGenerator extends Generator
         $this->renderFile('bundle/phpunit.xml.dist.twig', $dir.'/phpunit.xml.dist', $parameters);
         $this->renderFile('bundle/README.md.twig', $dir.'/README.md', $parameters);
         $this->renderFile('bundle/LICENSE-'.$license.'.twig', $dir.'/LICENSE.md', $parameters);
-        $this->filesystem->copy('bundle/gettext.pot', $dir.'/Resources/locale/'.strtolower($module).'.pot');
+        $this->renderFile('bundle/gettext.pot.twig', $dir.'/Resources/locale/'.strtolower($bundle).'.pot');
 //        $this->renderFile('bundle/Extension.php.twig', $dir.'/DependencyInjection/'.$basename.'Extension.php', $parameters);
 //        $this->renderFile('bundle/Configuration.php.twig', $dir.'/DependencyInjection/Configuration.php', $parameters);
         $this->renderFile('bundle/DefaultController.php.twig', $dir.'/Controller/DefaultController.php', $parameters);
