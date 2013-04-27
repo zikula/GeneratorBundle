@@ -154,7 +154,7 @@ EOT
                 '',
             ));
 
-            $namespace = $dialog->askAndValidate($output, $dialog->getQuestion('Module namespace', $input->getOption('namespace')), array('Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateModuleNamespace'), false, $input->getOption('namespace'));
+            $namespace = $dialog->askAndValidate($output, $dialog->getQuestion('Module namespace', $input->getOption('namespace')), array('Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateBundleNamespace'), false, $input->getOption('namespace'));
             $input->setOption('namespace', $namespace);
         }
 
@@ -177,7 +177,7 @@ EOT
                 'Based on the namespace, we suggest <comment>'.$module.'</comment>.',
                 '',
             ));
-            $module = $dialog->askAndValidate($output, $dialog->getQuestion('Module name', $module), array('Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateModuleName'), false, $module);
+            $module = $dialog->askAndValidate($output, $dialog->getQuestion('Module name', $module), array('Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateBundleName'), false, $module);
             $input->setOption('module-name', $module);
         }
 
