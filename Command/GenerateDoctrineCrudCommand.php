@@ -9,16 +9,17 @@
  * file that was distributed with this source code.
  */
 
-namespace Sensio\Bundle\GeneratorBundle\Command;
+namespace Zikula\Bundle\GeneratorBundle\Command;
 
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\Output;
 use Symfony\Component\Console\Command\Command;
-use Sensio\Bundle\GeneratorBundle\Generator\DoctrineCrudGenerator;
-use Sensio\Bundle\GeneratorBundle\Generator\DoctrineFormGenerator;
-use Sensio\Bundle\GeneratorBundle\Manipulator\RoutingManipulator;
+use Zikula\Bundle\GeneratorBundle\Generator\DoctrineCrudGenerator;
+use Zikula\Bundle\GeneratorBundle\Generator\DoctrineFormGenerator;
+use Zikula\Bundle\GeneratorBundle\Command\Helper\DialogHelper;
+use Zikula\Bundle\GeneratorBundle\Manipulator\RoutingManipulator;
 
 /**
  * Generates a CRUD for a Doctrine entity.
@@ -49,23 +50,23 @@ The <info>doctrine:generate:crud</info> command generates a CRUD based on a Doct
 
 The default command only generates the list and show actions.
 
-<info>php app/console doctrine:generate:crud --entity=AcmeBlogBundle:Post --route-prefix=post_admin</info>
+<info>php app/console doctrine:generate:crud --entity=AcmeBlogModule:Post --route-prefix=post_admin</info>
 
 Using the --with-write option allows to generate the new, edit and delete actions.
 
-<info>php app/console doctrine:generate:crud --entity=AcmeBlogBundle:Post --route-prefix=post_admin --with-write</info>
+<info>php app/console doctrine:generate:crud --entity=AcmeBlogModule:Post --route-prefix=post_admin --with-write</info>
 
 Every generated file is based on a template. There are default templates but they can be overriden by placing custom templates in one of the following locations, by order of priority:
 
-<info>BUNDLE_PATH/Resources/SensioGeneratorBundle/skeleton/crud
-APP_PATH/Resources/SensioGeneratorBundle/skeleton/crud</info>
+<info>BUNDLE_PATH/Resources/GeneratorBundle/skeleton/crud
+APP_PATH/Resources/GeneratorBundle/skeleton/crud</info>
 
 And
 
-<info>__bundle_path__/Resources/SensioGeneratorBundle/skeleton/form
-__project_root__/app/Resources/SensioGeneratorBundle/skeleton/form</info>
+<info>__bundle_path__/Resources/GeneratorBundle/skeleton/form
+__project_root__/app/Resources/GeneratorBundle/skeleton/form</info>
 
-You can check https://github.com/sensio/SensioGeneratorBundle/tree/master/Resources/skeleton
+You can check https://github.com/zikula/GeneratorBundle/tree/master/Resources/skeleton
 in order to know the file structure of the skeleton
 EOT
             )
@@ -139,11 +140,11 @@ EOT
             'You can give an entity that does not exist yet and the wizard will help',
             'you defining it.',
             '',
-            'You must use the shortcut notation like <comment>AcmeBlogBundle:Post</comment>.',
+            'You must use the shortcut notation like <comment>AcmeBlogModule:Post</comment>.',
             '',
         ));
 
-        $entity = $dialog->askAndValidate($output, $dialog->getQuestion('The Entity shortcut name', $input->getOption('entity')), array('Sensio\Bundle\GeneratorBundle\Command\Validators', 'validateEntityName'), false, $input->getOption('entity'));
+        $entity = $dialog->askAndValidate($output, $dialog->getQuestion('The Entity shortcut name', $input->getOption('entity')), array('Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateEntityName'), false, $input->getOption('entity'));
         $input->setOption('entity', $entity);
         list($bundle, $entity) = $this->parseShortcutNotation($entity);
 
@@ -169,7 +170,7 @@ EOT
             'Determine the format to use for the generated CRUD.',
             '',
         ));
-        $format = $dialog->askAndValidate($output, $dialog->getQuestion('Configuration format (yml, xml, php, or annotation)', $format), array('Sensio\Bundle\GeneratorBundle\Command\Validators', 'validateFormat'), false, $format);
+        $format = $dialog->askAndValidate($output, $dialog->getQuestion('Configuration format (yml, xml, php, or annotation)', $format), array('Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateFormat'), false, $format);
         $input->setOption('format', $format);
 
         // route prefix

@@ -3,21 +3,21 @@ SensioGeneratorBundle
 
 The ``SensioGeneratorBundle`` extends the default Symfony2 command line
 interface by providing new interactive and intuitive commands for generating
-code skeletons like bundles, form classes or CRUD controllers based on a
+code skeletons like modules, form classes or CRUD controllers based on a
 Doctrine 2 schema.
 
 Installation
 ------------
 
-`Download`_ the bundle and put it under the ``Sensio\\Bundle\\`` namespace.
-Then, like for any other bundle, include it in your Kernel class::
+`Download`_ the module and put it under the ``Sensio\\Bundle\\`` namespace.
+Then, like for any other module, include it in your Kernel class::
 
     public function registerBundles()
     {
-        $bundles = array(
+        $modules = array(
             ...
 
-            new Sensio\Bundle\GeneratorBundle\SensioGeneratorBundle(),
+            new Zikula\Bundle\GeneratorBundle\SensioGeneratorBundle(),
         );
 
         ...
@@ -34,12 +34,12 @@ new commands are listed below:
 .. toctree::
    :maxdepth: 1
 
-   commands/generate_bundle
+   commands/generate_module
    commands/generate_doctrine_crud
    commands/generate_doctrine_entity
    commands/generate_doctrine_form
 
-.. _Download: http://github.com/sensio/SensioGeneratorBundle
+.. _Download: http://github.com/zikula/GeneratorBundle
 
 Overriding Skeleton Templates
 -----------------------------
@@ -52,14 +52,14 @@ commands use templates provided by the bundle under its ``Resources/skeleton``
 directory.
 
 You can define custom skeleton templates by creating the same directory and
-file structure in ``APP_PATH/Resources/SensioGeneratorBundle/skeleton`` or
-``BUNDLE_PATH/Resources/SensioGeneratorBundle/skeleton`` if you want to extend
+file structure in ``APP_PATH/Resources/GeneratorBundle/skeleton`` or
+``BUNDLE_PATH/Resources/GeneratorBundle/skeleton`` if you want to extend
 the generator bundle (to be able to share your templates for instance in
 several projects).
 
 For instance, if you want to override the ``edit`` template for the CRUD
 generator, create a ``crud/views/edit.html.twig.twig`` file under
-``APP_PATH/Resources/SensioGeneratorBundle/skeleton``.
+``APP_PATH/Resources/GeneratorBundle/skeleton``.
 
 When overriding a template, have a look at the default templates to learn more
 about the available templates, their path, and the variables they have access.
@@ -69,7 +69,7 @@ extend it and only override the relevant parts:
 
 .. code-block: jinja
 
-  {# in app/Resources/SensioGeneratorBundle/skeleton/crud/actions/create.php.twig #}
+  {# in app/Resources/GeneratorBundle/skeleton/crud/actions/create.php.twig #}
 
   {# notice the "skeleton" prefix here -- more about it below #}
   {% extends "skeleton/crud/actions/create.php.twig" %}

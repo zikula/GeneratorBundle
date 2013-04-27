@@ -1,6 +1,6 @@
 {
-    "name": "sensio/generator-bundle",
-    "description": "This bundle generates code for you",
+    "name": "zikula/generator-bundle",
+    "description": "This module generates code for you",
     "keywords": [],
     "type": "symfony-bundle",
     "license": "MIT",
@@ -20,9 +20,9 @@
         "twig/twig": "~1.11"
     },
     "autoload": {
-        "psr-0": { "Sensio\\Bundle\\GeneratorBundle": "" }
+        "psr-0": { "Zikula\\Bundle\\GeneratorBundle": "" }
     },
-    "target-dir": "Sensio/Bundle/GeneratorBundle",
+    "target-dir": "Zikula/Bundle/GeneratorBundle",
     "minimum-stability": "dev",
     "extra": {
         "branch-alias": {

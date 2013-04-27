@@ -5,7 +5,7 @@ Usage
 -----
 
 The ``generate:doctrine:crud`` generates a basic controller for a given entity
-located in a given bundle. This controller allows to perform the five basic
+located in a given module. This controller allows to perform the five basic
 operations on a model.
 
 * Listing all records,
@@ -27,18 +27,18 @@ forget to pass all needed options:
 
 .. code-block:: bash
 
-    php app/console generate:doctrine:crud --entity=AcmeBlogBundle:Post --format=annotation --with-write --no-interaction
+    php app/console generate:doctrine:crud --entity=AcmeBlogModule:Post --format=annotation --with-write --no-interaction
 
 Available Options
 -----------------
 
 * ``--entity``: The entity name given as a shortcut notation containing the
-  bundle name in which the entity is located and the name of the entity. For
-  example: ``AcmeBlogBundle:Post``:
+  module name in which the entity is located and the name of the entity. For
+  example: ``AcmeBlogModule:Post``:
 
     .. code-block:: bash
 
-        php app/console generate:doctrine:crud --entity=AcmeBlogBundle:Post
+        php app/console generate:doctrine:crud --entity=AcmeBlogModule:Post
 
 * ``--route-prefix``: The prefix to use for each route that identifies an
   action:

@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Sensio\Bundle\GeneratorBundle\Generator;
+namespace Zikula\Bundle\GeneratorBundle\Generator;
 
 /**
  * Generator is the base class for all generators.

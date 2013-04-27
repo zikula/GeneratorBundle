@@ -9,10 +9,10 @@
  * file that was distributed with this source code.
  */
 
-namespace Sensio\Bundle\GeneratorBundle\Command;
+namespace Zikula\Bundle\GeneratorBundle\Command;
 
-use Sensio\Bundle\GeneratorBundle\Generator\DoctrineEntityGenerator;
-use Sensio\Bundle\GeneratorBundle\Command\Helper\DialogHelper;
+use Zikula\Bundle\GeneratorBundle\Generator\DoctrineEntityGenerator;
+use Zikula\Bundle\GeneratorBundle\Command\Helper\DialogHelper;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -33,45 +33,45 @@ class GenerateDoctrineEntityCommand extends GenerateDoctrineCommand
         $this
             ->setName('doctrine:generate:entity')
             ->setAliases(array('generate:doctrine:entity'))
-            ->setDescription('Generates a new Doctrine entity inside a bundle')
+            ->setDescription('Generates a new Doctrine entity inside a module')
             ->addOption('entity', null, InputOption::VALUE_REQUIRED, 'The entity class name to initialize (shortcut notation)')
             ->addOption('fields', null, InputOption::VALUE_REQUIRED, 'The fields to create with the new entity')
             ->addOption('format', null, InputOption::VALUE_REQUIRED, 'Use the format for configuration files (php, xml, yml, or annotation)', 'annotation')
             ->addOption('with-repository', null, InputOption::VALUE_NONE, 'Whether to generate the entity repository or not')
             ->setHelp(<<<EOT
 The <info>doctrine:generate:entity</info> task generates a new Doctrine
-entity inside a bundle:
+entity inside a module:
 
-<info>php app/console doctrine:generate:entity --entity=AcmeBlogBundle:Blog/Post</info>
+<info>php app/console doctrine:generate:entity --entity=AcmeBlogModule:Blog/Post</info>
 
 The above command would initialize a new entity in the following entity
-namespace <info>Acme\BlogBundle\Entity\Blog\Post</info>.
+namespace <info>Acme\BlogModule\Entity\Blog\Post</info>.
 
 You can also optionally specify the fields you want to generate in the new
 entity:
 
-<info>php app/console doctrine:generate:entity --entity=AcmeBlogBundle:Blog/Post --fields="title:string(255) body:text"</info>
+<info>php app/console doctrine:generate:entity --entity=AcmeBlogModule:Blog/Post --fields="title:string(255) body:text"</info>
 
 The command can also generate the corresponding entity repository class with the
 <comment>--with-repository</comment> option:
 
-<info>php app/console doctrine:generate:entity --entity=AcmeBlogBundle:Blog/Post --with-repository</info>
+<info>php app/console doctrine:generate:entity --entity=AcmeBlogModule:Blog/Post --with-repository</info>
 
 By default, the command uses annotations for the mapping information; change it
 with <comment>--format</comment>:
 
-<info>php app/console doctrine:generate:entity --entity=AcmeBlogBundle:Blog/Post --format=yml</info>
+<info>php app/console doctrine:generate:entity --entity=AcmeBlogModule:Blog/Post --format=yml</info>
 
 To deactivate the interaction mode, simply use the `--no-interaction` option
 without forgetting to pass all needed options:
 
-<info>php app/console doctrine:generate:entity --entity=AcmeBlogBundle:Blog/Post --format=annotation --fields="title:string(255) body:text" --with-repository --no-interaction</info>
+<info>php app/console doctrine:generate:entity --entity=AcmeBlogModule:Blog/Post --format=annotation --fields="title:string(255) body:text" --with-repository --no-interaction</info>
 EOT
         );
     }
 
     /**
-     * @throws \InvalidArgumentException When the bundle doesn't end with Bundle (Example: "Bundle/MySampleBundle")
+     * @throws \InvalidArgumentException When the module doesn't end with Module (Example: "Module/MySampleModule")
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -113,7 +113,7 @@ EOT
             'This command helps you generate Doctrine2 entities.',
             '',
             'First, you need to give the entity name you want to generate.',
-            'You must use the shortcut notation like <comment>AcmeBlogBundle:Post</comment>.',
+            'You must use the shortcut notation like <comment>AcmeBlogModule:Post</comment>.',
             ''
         ));
 
@@ -153,7 +153,7 @@ EOT
 
         $formats = array('yml', 'xml', 'php', 'annotation');
 
-        $format = $dialog->askAndValidate($output, $dialog->getQuestion('Configuration format (yml, xml, php, or annotation)', $input->getOption('format')), array('Sensio\Bundle\GeneratorBundle\Command\Validators', 'validateFormat'), false, $input->getOption('format'), $formats);
+        $format = $dialog->askAndValidate($output, $dialog->getQuestion('Configuration format (yml, xml, php, or annotation)', $input->getOption('format')), array('Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateFormat'), false, $input->getOption('format'), $formats);
         $input->setOption('format', $format);
 
         // fields

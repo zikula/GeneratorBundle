@@ -5,11 +5,11 @@
  *
  * (c) Fabien Potencier <fabien@symfony.com>
  *
- * This source file is subject to the MIT license that is bundled
+ * This source file is subject to the MIT license that is moduled
  * with this source code in the file LICENSE.
  */
 
-namespace Sensio\Bundle\GeneratorBundle;
+namespace Zikula\Bundle\GeneratorBundle;
 
 use Symfony\Component\HttpKernel\Bundle\Bundle;
 
@@ -18,6 +18,6 @@ use Symfony\Component\HttpKernel\Bundle\Bundle;
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-class SensioGeneratorBundle extends Bundle
+class ZikulaGeneratorBundle extends Bundle
 {
 }

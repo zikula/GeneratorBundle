@@ -9,14 +9,14 @@
  * file that was distributed with this source code.
  */
 
-namespace Sensio\Bundle\GeneratorBundle\Command;
+namespace Zikula\Bundle\GeneratorBundle\Command;
 
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\Output;
 use Symfony\Component\Console\Command\Command;
-use Sensio\Bundle\GeneratorBundle\Generator\DoctrineFormGenerator;
+use Zikula\Bundle\GeneratorBundle\Generator\DoctrineFormGenerator;
 
 /**
  * Generates a form type class for a given Doctrine entity.
@@ -39,14 +39,14 @@ class GenerateDoctrineFormCommand extends GenerateDoctrineCommand
             ->setHelp(<<<EOT
 The <info>doctrine:generate:form</info> command generates a form class based on a Doctrine entity.
 
-<info>php app/console doctrine:generate:form AcmeBlogBundle:Post</info>
+<info>php app/console doctrine:generate:form AcmeBlogModule:Post</info>
 
 Every generated file is based on a template. There are default templates but they can be overriden by placing custom templates in one of the following locations, by order of priority:
 
-<info>BUNDLE_PATH/Resources/SensioGeneratorBundle/skeleton/form
-APP_PATH/Resources/SensioGeneratorBundle/skeleton/form</info>
+<info>BUNDLE_PATH/Resources/GeneratorBundle/skeleton/form
+APP_PATH/Resources/GeneratorBundle/skeleton/form</info>
 
-You can check https://github.com/sensio/SensioGeneratorBundle/tree/master/Resources/skeleton
+You can check https://github.com/zikula/GeneratorBundle/tree/master/Resources/skeleton
 in order to know the file structure of the skeleton
 EOT
             )

@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Sensio\Bundle\GeneratorBundle\Command;
+namespace Zikula\Bundle\GeneratorBundle\Command;
 
 use Doctrine\Bundle\DoctrineBundle\Mapping\MetadataFactory;
 
@@ -25,7 +25,7 @@ abstract class GenerateDoctrineCommand extends GeneratorCommand
         $entity = str_replace('/', '\\', $shortcut);
 
         if (false === $pos = strpos($entity, ':')) {
-            throw new \InvalidArgumentException(sprintf('The entity name must contain a : ("%s" given, expecting something like AcmeBlogBundle:Blog/Post)', $entity));
+            throw new \InvalidArgumentException(sprintf('The entity name must contain a : ("%s" given, expecting something like AcmeBlogModule:Blog/Post)', $entity));
         }
 
         return array(substr($entity, 0, $pos), substr($entity, $pos + 1));

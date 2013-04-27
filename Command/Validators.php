@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Sensio\Bundle\GeneratorBundle\Command;
+namespace Zikula\Bundle\GeneratorBundle\Command;
 
 /**
  * Validator functions.
@@ -20,8 +20,8 @@ class Validators
 {
     public static function validateBundleNamespace($namespace)
     {
-        if (!preg_match('/Bundle$/', $namespace)) {
-            throw new \InvalidArgumentException('The namespace must end with Bundle.');
+        if (!preg_match('/Module$/', $namespace)) {
+            throw new \InvalidArgumentException('The namespace must end with Module.');
         }
 
         $namespace = strtr($namespace, '/', '\\');
@@ -41,7 +41,7 @@ class Validators
         if (false === strpos($namespace, '\\')) {
             $msg = array();
             $msg[] = sprintf('The namespace must contain a vendor namespace (e.g. "VendorName\%s" instead of simply "%s").', $namespace, $namespace);
-            $msg[] = 'If you\'ve specified a vendor namespace, did you forget to surround it with quotes (init:bundle "Acme\BlogBundle")?';
+            $msg[] = 'If you\'ve specified a vendor namespace, did you forget to surround it with quotes (init:module "Acme\BlogModule")?';
 
             throw new \InvalidArgumentException(implode("\n\n", $msg));
         }
@@ -51,8 +51,8 @@ class Validators
 
     public static function validateBundleName($bundle)
     {
-        if (!preg_match('/^[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*$/', $bundle)) {
-            throw new \InvalidArgumentException('The bundle name contains invalid characters.');
+        if (!preg_match('/Module$/', $bundle)) {
+            throw new \InvalidArgumentException('The module name must end with Module.');
         }
         
         if (!preg_match('/Bundle$/', $bundle)) {
@@ -69,7 +69,7 @@ class Validators
         } catch (\InvalidArgumentException $e) {
             throw new \InvalidArgumentException(
                 sprintf(
-                    'The controller name must contain a : ("%s" given, expecting something like AcmeBlogBundle:Post)',
+                    'The controller name must contain a : ("%s" given, expecting something like AcmeBlogModule:Post)',
                     $controller
                 )
             );
@@ -98,7 +98,7 @@ class Validators
     public static function validateEntityName($entity)
     {
         if (false === $pos = strpos($entity, ':')) {
-            throw new \InvalidArgumentException(sprintf('The entity name must contain a : ("%s" given, expecting something like AcmeBlogBundle:Blog/Post)', $entity));
+            throw new \InvalidArgumentException(sprintf('The entity name must contain a : ("%s" given, expecting something like AcmeBlogModule:Blog/Post)', $entity));
         }
 
         return $entity;

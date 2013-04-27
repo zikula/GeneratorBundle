@@ -9,13 +9,13 @@
  * file that was distributed with this source code.
  */
 
-namespace Sensio\Bundle\GeneratorBundle\Command;
+namespace Zikula\Bundle\GeneratorBundle\Command;
 
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Sensio\Bundle\GeneratorBundle\Command\Helper\DialogHelper;
-use Sensio\Bundle\GeneratorBundle\Generator\ControllerGenerator;
+use Zikula\Bundle\GeneratorBundle\Command\Helper\DialogHelper;
+use Zikula\Bundle\GeneratorBundle\Generator\ControllerGenerator;
 
 /**
  * Generates controllers.
@@ -63,27 +63,27 @@ class GenerateControllerCommand extends GeneratorCommand
             ->setDescription('Generates a controller')
             ->setHelp(<<<EOT
 The <info>generate:controller</info> command helps you generates new controllers
-inside bundles.
+inside modules.
 
 By default, the command interacts with the developer to tweak the generation.
 Any passed option will be used as a default value for the interaction
-(<comment>--bundle</comment> and <comment>--controller</comment> are the only
+(<comment>--module</comment> and <comment>--controller</comment> are the only
 ones needed if you follow the conventions):
 
-<info>php app/console generate:controller --controller=AcmeBlogBundle:Post</info>
+<info>php app/console generate:controller --controller=AcmeBlogModule:Post</info>
 
 If you want to disable any user interaction, use <comment>--no-interaction</comment>
 but don't forget to pass all needed options:
 
-<info>php app/console generate:controller --controller=AcmeBlogBundle:Post --no-interaction</info>
+<info>php app/console generate:controller --controller=AcmeBlogModule:Post --no-interaction</info>
 
 Every generated file is based on a template. There are default templates but they can
 be overriden by placing custom templates in one of the following locations, by order of priority:
 
-<info>BUNDLE_PATH/Resources/SensioGeneratorBundle/skeleton/controller
-APP_PATH/Resources/SensioGeneratorBundle/skeleton/controller</info>
+<info>MODULE_PATH/Resources/GeneratorBundle/skeleton/controller
+APP_PATH/Resources/GeneratorBundle/skeleton/controller</info>
 
-You can check https://github.com/sensio/SensioGeneratorBundle/tree/master/Resources/skeleton
+You can check https://github.com/zikula/GeneratorBundle/tree/master/Resources/skeleton
 in order to know the file structure of the skeleton
 EOT
             )
@@ -131,7 +131,7 @@ EOT
     public function interact(InputInterface $input, OutputInterface $output)
     {
         $dialog = $this->getDialogHelper();
-        $dialog->writeSection($output, 'Welcome to the Symfony2 controller generator');
+        $dialog->writeSection($output, 'Welcome to the Zikula controller generator');
 
         // namespace
         $output->writeln(array(
@@ -140,7 +140,7 @@ EOT
             'This command helps you generate them easily.',
             '',
             'First, you need to give the controller name you want to generate.',
-            'You must use the shortcut notation like <comment>AcmeBlogBundle:Post</comment>',
+            'You must use the shortcut notation like <comment>AcmeBlogModule:Post</comment>',
             '',
         ));
 
@@ -322,7 +322,7 @@ EOT
         $entity = str_replace('/', '\\', $shortcut);
 
         if (false === $pos = strpos($entity, ':')) {
-            throw new \InvalidArgumentException(sprintf('The controller name must contain a : ("%s" given, expecting something like AcmeBlogBundle:Post)', $entity));
+            throw new \InvalidArgumentException(sprintf('The controller name must contain a : ("%s" given, expecting something like AcmeBlogModule:Post)', $entity));
         }
 
         return array(substr($entity, 0, $pos), substr($entity, $pos + 1));

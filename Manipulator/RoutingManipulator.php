@@ -9,7 +9,7 @@
  * file that was distributed with this source code.
  */
 
-namespace Sensio\Bundle\GeneratorBundle\Manipulator;
+namespace Zikula\Bundle\GeneratorBundle\Manipulator;
 
 use Symfony\Component\DependencyInjection\Container;
 
@@ -52,7 +52,7 @@ class RoutingManipulator extends Manipulator
 
             // Don't add same bundle twice
             if (false !== strpos($current, $bundle)) {
-                throw new \RuntimeException(sprintf('Bundle "%s" is already imported.', $bundle));
+                throw new \RuntimeException(sprintf('Module "%s" is already imported.', $bundle));
             }
         } elseif (!is_dir($dir = dirname($this->file))) {
             mkdir($dir, 0777, true);
