@@ -2,25 +2,16 @@
 
 namespace Zikula\Bundle\GeneratorBundle;
 
-use Symfony\Component\Console\Application as BaseApplication;
+use Symfony\Bundle\FrameworkBundle\Console\Application as BaseApplication;
+use Symfony\Component\HttpKernel\KernelInterface;
 
 class Application extends BaseApplication
 {
-    public function __construct()
+    public function __construct(KernelInterface $kernel)
     {
-        error_reporting(-1);
+        parent::__construct($kernel);
 
-        parent::__construct('Zikula Generator', '0.0.1');
-
-        $this->add(new Command\GenerateControllerCommand());
-        $this->add(new Command\GenerateDoctrineCrudCommand());
-        $this->add(new Command\GenerateDoctrineEntityCommand());
-        $this->add(new Command\GenerateDoctrineFormCommand());
-        $this->add(new Command\GenerateModuleCommand());
-    }
-
-    public function getLongVersion()
-    {
-        return parent::getLongVersion().' by <comment>Drak</comment>';
+        $this->setName('Zikula');
+        $this->setVersion('0.0.1 - '.$kernel->getName().'/'.$kernel->getEnvironment().($kernel->isDebug() ? '/debug' : ''));
     }
 }

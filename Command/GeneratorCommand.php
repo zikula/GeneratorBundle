@@ -12,8 +12,8 @@
 namespace Zikula\Bundle\GeneratorBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
-use Sensio\Bundle\GeneratorBundle\Command\Helper\DialogHelper;
-use Sensio\Bundle\GeneratorBundle\Generator\Generator;
+use Zikula\Bundle\GeneratorBundle\Command\Helper\DialogHelper;
+use Zikula\Bundle\GeneratorBundle\Generator\Generator;
 
 /**
  * Base class for generator commands.
@@ -22,6 +22,9 @@ use Sensio\Bundle\GeneratorBundle\Generator\Generator;
  */
 abstract class GeneratorCommand extends ContainerAwareCommand
 {
+    /**
+     * @var Generator
+     */
     private $generator;
 
     // only useful for unit tests
@@ -46,11 +49,11 @@ abstract class GeneratorCommand extends ContainerAwareCommand
     {
         $skeletonDirs = array();
 
-        if (isset($bundle) && is_dir($dir = $bundle->getPath().'/Resources/SensioGeneratorBundle/skeleton')) {
+        if (isset($bundle) && is_dir($dir = $bundle->getPath().'/Resources/ZikulaGeneratorBundle/skeleton')) {
             $skeletonDirs[] = $dir;
         }
 
-        if (is_dir($dir = $this->getContainer()->get('kernel')->getRootdir().'/Resources/SensioGeneratorBundle/skeleton')) {
+        if (is_dir($dir = $this->getContainer()->get('kernel')->getRootdir().'/Resources/ZikulaGeneratorBundle/skeleton')) {
             $skeletonDirs[] = $dir;
         }
 
@@ -63,7 +66,7 @@ abstract class GeneratorCommand extends ContainerAwareCommand
     protected function getDialogHelper()
     {
         $dialog = $this->getHelperSet()->get('dialog');
-        if (!$dialog || get_class($dialog) !== 'Sensio\Bundle\GeneratorBundle\Command\Helper\DialogHelper') {
+        if (!$dialog || get_class($dialog) !== 'Zikula\Bundle\GeneratorBundle\Command\Helper\DialogHelper') {
             $this->getHelperSet()->set($dialog = new DialogHelper());
         }
 

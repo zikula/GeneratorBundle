@@ -15,18 +15,14 @@ use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Output\Output;
-use Symfony\Component\HttpKernel\KernelInterface;
-use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
-use Zikula\Bundle\GeneratorBundle\Generator\ModuleGenerator;
-use Zikula\Bundle\GeneratorBundle\Manipulator\RoutingManipulator;
-use Zikula\Bundle\GeneratorBundle\Command\Helper\DialogHelper;
+use Zikula\Bundle\GeneratorBundle\Generator\BundleGenerator;
 
 /**
- * Generates modules.
+ * Generates bundles.
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-class GenerateModuleCommand extends ContainerAwareCommand
+class GenerateBundleCommand extends GeneratorCommand
 {
     private $generator;
 
@@ -70,8 +66,8 @@ EOT
     /**
      * @see Command
      *
-     * @throws \InvalidArgumentException When namespace doesn't end with Module
-     * @throws \RuntimeException         When module can't be executed
+     * @throws \InvalidArgumentException When namespace doesn't end with Bundle
+     * @throws \RuntimeException         When bundle can't be executed
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
@@ -92,11 +88,11 @@ EOT
         }
 
         $namespace = Validators::validateBundleNamespace($input->getOption('namespace'));
-        if (!$module = $input->getOption('module-name')) {
-            $module = strtr($namespace, array('\\' => ''));
+        if (!$bundle = $input->getOption('module-name')) {
+            $bundle = strtr($namespace, array('\\' => ''));
         }
-        $module = Validators::validateBundleName($module);
-        $dir = Validators::validateTargetDir($input->getOption('dir'), $module, $namespace);
+        $bundle = Validators::validateBundleName($bundle);
+        $dir = Validators::validateTargetDir($input->getOption('dir'), $bundle, $namespace);
         if (null === $input->getOption('format')) {
             $input->setOption('format', 'annotation');
         }
@@ -109,7 +105,7 @@ EOT
         }
 
         $generator = $this->getGenerator();
-        $generator->generate($namespace, $module, $dir, $format);
+        $generator->generate($namespace, $bundle, $dir, $format);
 
         $output->writeln('Generating the module code: <info>OK</info>');
 
@@ -117,7 +113,7 @@ EOT
         $runner = $dialog->getRunner($output, $errors);
 
         // routing
-        //$runner($this->updateRouting($dialog, $input, $output, $module, $format));
+        $runner($this->updateRouting($dialog, $input, $output, $bundle, $format));
 
         $dialog->writeGeneratorSummary($output, $errors);
     }
@@ -158,33 +154,33 @@ EOT
             $input->setOption('namespace', $namespace);
         }
 
-        // module name
-        $module = null;
+        // bundle name
+        $bundle = null;
         try {
-            $module = $input->getOption('module-name') ? Validators::validateBundleName($input->getOption('module-name')) : null;
+            $bundle = $input->getOption('module-name') ? Validators::validateBundleName($input->getOption('module-name')) : null;
         } catch (\Exception $error) {
             $output->writeln($dialog->getHelperSet()->get('formatter')->formatBlock($error->getMessage(), 'error'));
         }
 
-        if (null === $module) {
-            $module = strtr($namespace, array('\\Module\\' => '', '\\' => ''));
+        if (null === $bundle) {
+            $bundle = strtr($namespace, array('\\Module\\' => '', '\\' => ''));
 
             $output->writeln(array(
                 '',
                 'In your code, a module is often referenced by its name. It can be the',
                 'concatenation of all namespace parts but it\'s really up to you to come',
                 'up with a unique name (a good practice is to start with the vendor name).',
-                'Based on the namespace, we suggest <comment>'.$module.'</comment>.',
+                'Based on the namespace, we suggest <comment>'.$bundle.'</comment>.',
                 '',
             ));
-            $module = $dialog->askAndValidate($output, $dialog->getQuestion('Module name', $module), array('Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateBundleName'), false, $module);
-            $input->setOption('module-name', $module);
+            $bundle = $dialog->askAndValidate($output, $dialog->getQuestion('Module name', $bundle), array('Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateBundleName'), false, $bundle);
+            $input->setOption('module-name', $bundle);
         }
 
         // target dir
         $dir = null;
         try {
-            $dir = $input->getOption('dir') ? Validators::validateTargetDir($input->getOption('dir'), $module, $namespace) : null;
+            $dir = $input->getOption('dir') ? Validators::validateTargetDir($input->getOption('dir'), $bundle, $namespace) : null;
         } catch (\Exception $error) {
             $output->writeln($dialog->getHelperSet()->get('formatter')->formatBlock($error->getMessage(), 'error'));
         }
@@ -198,7 +194,7 @@ EOT
                 'the standard conventions.',
                 '',
             ));
-            $dir = $dialog->askAndValidate($output, $dialog->getQuestion('Target directory', $dir), function ($dir) use ($module, $namespace) { return Validators::validateTargetDir($dir, $module, $namespace); }, false, $dir);
+            $dir = $dialog->askAndValidate($output, $dialog->getQuestion('Target directory', $dir), function ($dir) use ($bundle, $namespace) { return Validators::validateTargetDir($dir, $bundle, $namespace); }, false, $dir);
             $input->setOption('dir', $dir);
         }
 
@@ -212,53 +208,35 @@ EOT
 
         if (null === $format) {
             $output->writeln(array(
-                '',
-                'Determine the format to use for the generated configuration.',
-                '',
-            ));
+                                  '',
+                                  'Determine the format to use for the generated configuration.',
+                                  '',
+                             ));
             $format = $dialog->askAndValidate($output, $dialog->getQuestion('Configuration format (yml, xml, php, or annotation)', $input->getOption('format')), array('Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateFormat'), false, $input->getOption('format'));
             $input->setOption('format', $format);
         }
 
         // optional files to generate
         $output->writeln(array(
-            '',
-            'To help you get started faster, the command can generate some',
-            'code snippets for you.',
-            '',
-        ));
+                              '',
+                              'To help you get started faster, the command can generate some',
+                              'code snippets for you.',
+                              '',
+                         ));
 
         // summary
         $output->writeln(array(
-            '',
-            $this->getHelper('formatter')->formatBlock('Summary before generation', 'bg=blue;fg=white', true),
-            '',
-            sprintf("You are going to generate a \"<info>%s\\%s</info>\" module\nin \"<info>%s</info>\" using the \"<info>%s</info>\" format.", $namespace, $module, $dir, $format),
-            '',
-        ));
+                              '',
+                              $this->getHelper('formatter')->formatBlock('Summary before generation', 'bg=blue;fg=white', true),
+                              '',
+                              sprintf("You are going to generate a \"<info>%s\\%s</info>\" module\nin \"<info>%s</info>\" using the \"<info>%s</info>\" format.", $namespace, $bundle, $dir, $format),
+                              '',
+                         ));
     }
 
-    protected function getGenerator()
+
+    protected function createGenerator()
     {
-        if (null === $this->generator) {
-            $this->generator = new ModuleGenerator($this->getContainer()->get('filesystem'), __DIR__.'/../Resources/skeleton/module');
-        }
-
-        return $this->generator;
-    }
-
-    public function setGenerator(ModuleGenerator $generator)
-    {
-        $this->generator = $generator;
-    }
-
-    protected function getDialogHelper()
-    {
-        $dialog = $this->getHelperSet()->get('dialog');
-        if (!$dialog || get_class($dialog) !== 'Zikula\Bundle\GeneratorBundle\Command\Helper\DialogHelper') {
-            $this->getHelperSet()->set($dialog = new DialogHelper());
-        }
-
-        return $dialog;
+        return new BundleGenerator($this->getContainer()->get('filesystem'));
     }
 }

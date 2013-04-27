@@ -24,8 +24,6 @@ use Zikula\Bundle\GeneratorBundle\Generator\ControllerGenerator;
  */
 class GenerateControllerCommand extends GeneratorCommand
 {
-    private $generator;
-
     /**
      * @see Command
      */
@@ -145,7 +143,7 @@ EOT
         ));
 
         while (true) {
-            $controller = $dialog->askAndValidate($output, $dialog->getQuestion('Controller name', $input->getOption('controller')), array('Sensio\Bundle\GeneratorBundle\Command\Validators', 'validateControllerName'), false, $input->getOption('controller'));
+            $controller = $dialog->askAndValidate($output, $dialog->getQuestion('Controller name', $input->getOption('controller')), array('Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateControllerName'), false, $input->getOption('controller'));
             list($bundle, $controller) = $this->parseShortcutNotation($controller);
 
             try {
@@ -169,7 +167,7 @@ EOT
             'Determine the format to use for the routing.',
             '',
         ));
-        $routeFormat = $dialog->askAndValidate($output, $dialog->getQuestion('Routing format (php, xml, yml, annotation)', $defaultFormat), array('Sensio\Bundle\GeneratorBundle\Command\Validators', 'validateFormat'), false, $defaultFormat);
+        $routeFormat = $dialog->askAndValidate($output, $dialog->getQuestion('Routing format (php, xml, yml, annotation)', $defaultFormat), array('Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateFormat'), false, $defaultFormat);
         $input->setOption('route-format', $routeFormat);
 
         // templating format

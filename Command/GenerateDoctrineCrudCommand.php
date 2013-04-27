@@ -28,7 +28,6 @@ use Zikula\Bundle\GeneratorBundle\Manipulator\RoutingManipulator;
  */
 class GenerateDoctrineCrudCommand extends GenerateDoctrineCommand
 {
-    private $generator;
     private $formGenerator;
 
     /**
