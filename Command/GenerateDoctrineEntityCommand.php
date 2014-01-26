@@ -118,7 +118,7 @@ EOT
         $bundleNames = array_keys($this->getContainer()->get('kernel')->getBundles());
 
         while (true) {
-            $entity = $dialog->askAndValidate($output, $dialog->getQuestion('The Entity shortcut name', $input->getOption('entity')), array('zikula\Bundle\GeneratorBundle\Command\Validators', 'validateEntityName'), false, $input->getOption('entity'), $bundleNames);
+            $entity = $dialog->askAndValidate($output, $dialog->getQuestion('The Entity shortcut name', $input->getOption('entity')), array('Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateEntityName'), false, $input->getOption('entity'), $bundleNames);
 
             list($bundle, $entity) = $this->parseShortcutNotation($entity);
 
