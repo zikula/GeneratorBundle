@@ -94,7 +94,7 @@ class Validators
     public static function validateEntityName($entity)
     {
         if (false === $pos = strpos($entity, ':')) {
-            throw new \InvalidArgumentException(sprintf('The entity name must contain a : ("%s" given, expecting something like AcmeBlogModule:Blog/Post)', $entity));
+            throw new \InvalidArgumentException(sprintf('The entity name must contain a ":" ("%s" given, expecting something like AcmeBlogModule:Post)', $entity));
         }
 
         return $entity;
