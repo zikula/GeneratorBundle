@@ -36,15 +36,15 @@ class GenerateDoctrineEntityCommandTest extends GenerateCommandTest
 
     public function getInteractiveCommandData()
     {
-        return array(
-            array(array(), "AcmeBlogBundle:Blog/Post\n", array('Blog\\Post', 'annotation', array())),
-            array(array('--entity' => 'AcmeBlogBundle:Blog/Post'), '', array('Blog\\Post', 'annotation', array())),
-            array(array(), "AcmeBlogBundle:Blog/Post\nyml\n\n", array('Blog\\Post', 'yml', array())),
-            array(array(), "AcmeBlogBundle:Blog/Post\nyml\ncreated_by\n\n255\ndescription\ntext\n\n", array('Blog\\Post', 'yml', array(
-                array('fieldName' => 'createdBy', 'type' => 'string', 'length' => 255, 'columnName' => 'created_by'),
-                array('fieldName' => 'description', 'type' => 'text', 'columnName' => 'description'),
-            ))),
-        );
+        return [
+            [[], "AcmeBlogBundle:Blog/Post\n", ['Blog\\Post', 'annotation', []]],
+            [['--entity' => 'AcmeBlogBundle:Blog/Post'], '', ['Blog\\Post', 'annotation', []]],
+            [[], "AcmeBlogBundle:Blog/Post\nyml\n\n", ['Blog\\Post', 'yml', []]],
+            [[], "AcmeBlogBundle:Blog/Post\nyml\ncreated_by\n\n255\ndescription\ntext\n\n", ['Blog\\Post', 'yml', [
+                ['fieldName' => 'createdBy', 'type' => 'string', 'length' => 255, 'columnName' => 'created_by'],
+                ['fieldName' => 'description', 'type' => 'text', 'columnName' => 'description'],
+            ]]],
+        ];
     }
 
     /**
@@ -67,18 +67,18 @@ class GenerateDoctrineEntityCommandTest extends GenerateCommandTest
         ;
 
         $tester = new CommandTester($this->getCommand($generator, ''));
-        $tester->execute($options, array('interactive' => false));
+        $tester->execute($options, ['interactive' => false]);
     }
 
     public function getNonInteractiveCommandData()
     {
-        return array(
-            array(array('--entity' => 'AcmeBlogBundle:Blog/Post'), array('Blog\\Post', 'annotation', array())),
-            array(array('--entity' => 'AcmeBlogBundle:Blog/Post', '--format' => 'yml', '--fields' => 'created_by:string(255) description:text'), array('Blog\\Post', 'yml', array(
-                array('fieldName' => 'created_by', 'type' => 'string', 'length' => 255),
-                array('fieldName' => 'description', 'type' => 'text', 'length' => ''),
-            ))),
-        );
+        return [
+            [['--entity' => 'AcmeBlogBundle:Blog/Post'], ['Blog\\Post', 'annotation', []]],
+            [['--entity' => 'AcmeBlogBundle:Blog/Post', '--format' => 'yml', '--fields' => 'created_by:string(255) description:text'], ['Blog\\Post', 'yml', [
+                ['fieldName' => 'created_by', 'type' => 'string', 'length' => 255],
+                ['fieldName' => 'description', 'type' => 'text', 'length' => ''],
+            ]]],
+        ];
     }
 
     protected function getCommand($generator, $input)
@@ -97,7 +97,7 @@ class GenerateDoctrineEntityCommandTest extends GenerateCommandTest
         return $this
             ->getMockBuilder('Sensio\Bundle\GeneratorBundle\Generator\DoctrineEntityGenerator')
             ->disableOriginalConstructor()
-            ->setMethods(array('generate', 'isReservedKeyword'))
+            ->setMethods(['generate', 'isReservedKeyword'])
             ->getMock()
         ;
     }

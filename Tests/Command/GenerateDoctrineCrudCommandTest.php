@@ -36,13 +36,13 @@ class GenerateDoctrineCrudCommandTest extends GenerateCommandTest
 
     public function getInteractiveCommandData()
     {
-        return array(
-            array(array(), "AcmeBlogBundle:Blog/Post\n", array('Blog\\Post', 'annotation', 'blog_post', false)),
-            array(array('--entity' => 'AcmeBlogBundle:Blog/Post'), '', array('Blog\\Post', 'annotation', 'blog_post', false)),
-            array(array(), "AcmeBlogBundle:Blog/Post\ny\nyml\nfoobar\n", array('Blog\\Post', 'yml', 'foobar', true)),
-            array(array(), "AcmeBlogBundle:Blog/Post\ny\nyml\n/foobar\n", array('Blog\\Post', 'yml', 'foobar', true)),
-            array(array('--entity' => 'AcmeBlogBundle:Blog/Post', '--format' => 'yml', '--route-prefix' => 'foo', '--with-write' => true), '', array('Blog\\Post', 'yml', 'foo', true)),
-        );
+        return [
+            [[], "AcmeBlogBundle:Blog/Post\n", ['Blog\\Post', 'annotation', 'blog_post', false]],
+            [['--entity' => 'AcmeBlogBundle:Blog/Post'], '', ['Blog\\Post', 'annotation', 'blog_post', false]],
+            [[], "AcmeBlogBundle:Blog/Post\ny\nyml\nfoobar\n", ['Blog\\Post', 'yml', 'foobar', true]],
+            [[], "AcmeBlogBundle:Blog/Post\ny\nyml\n/foobar\n", ['Blog\\Post', 'yml', 'foobar', true]],
+            [['--entity' => 'AcmeBlogBundle:Blog/Post', '--format' => 'yml', '--route-prefix' => 'foo', '--with-write' => true], '', ['Blog\\Post', 'yml', 'foo', true]],
+        ];
     }
 
     /**
@@ -60,29 +60,29 @@ class GenerateDoctrineCrudCommandTest extends GenerateCommandTest
         ;
 
         $tester = new CommandTester($this->getCommand($generator, ''));
-        $tester->execute($options, array('interactive' => false));
+        $tester->execute($options, ['interactive' => false]);
     }
 
     public function getNonInteractiveCommandData()
     {
-        return array(
-            array(array('--entity' => 'AcmeBlogBundle:Blog/Post'), array('Blog\\Post', 'annotation', 'blog_post', false)),
-            array(array('--entity' => 'AcmeBlogBundle:Blog/Post', '--format' => 'yml', '--route-prefix' => 'foo', '--with-write' => true), array('Blog\\Post', 'yml', 'foo', true)),
-        );
+        return [
+            [['--entity' => 'AcmeBlogBundle:Blog/Post'], ['Blog\\Post', 'annotation', 'blog_post', false]],
+            [['--entity' => 'AcmeBlogBundle:Blog/Post', '--format' => 'yml', '--route-prefix' => 'foo', '--with-write' => true], ['Blog\\Post', 'yml', 'foo', true]],
+        ];
     }
 
     protected function getCommand($generator, $input)
     {
         $command = $this
             ->getMockBuilder('Sensio\Bundle\GeneratorBundle\Command\GenerateDoctrineCrudCommand')
-            ->setMethods(array('getEntityMetadata'))
+            ->setMethods(['getEntityMetadata'])
             ->getMock()
         ;
 
         $command
             ->expects($this->any())
             ->method('getEntityMetadata')
-            ->will($this->returnValue(array($this->getDoctrineMetadata())))
+            ->will($this->returnValue([$this->getDoctrineMetadata()]))
         ;
 
         $command->setContainer($this->getContainer());
@@ -108,7 +108,7 @@ class GenerateDoctrineCrudCommandTest extends GenerateCommandTest
         return $this
             ->getMockBuilder('Sensio\Bundle\GeneratorBundle\Generator\DoctrineCrudGenerator')
             ->disableOriginalConstructor()
-            ->setMethods(array('generate'))
+            ->setMethods(['generate'])
             ->getMock()
         ;
     }
@@ -118,7 +118,7 @@ class GenerateDoctrineCrudCommandTest extends GenerateCommandTest
         return $this
             ->getMockBuilder('Sensio\Bundle\GeneratorBundle\Generator\DoctrineFormGenerator')
             ->disableOriginalConstructor()
-            ->setMethods(array('generate'))
+            ->setMethods(['generate'])
             ->getMock()
         ;
     }

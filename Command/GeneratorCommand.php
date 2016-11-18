@@ -47,7 +47,7 @@ abstract class GeneratorCommand extends ContainerAwareCommand
 
     protected function getSkeletonDirs($bundle = null)
     {
-        $skeletonDirs = array();
+        $skeletonDirs = [];
 
         if (isset($bundle) && is_dir($dir = $bundle->getPath().'/Resources/ZikulaGeneratorBundle/skeleton')) {
             $skeletonDirs[] = $dir;

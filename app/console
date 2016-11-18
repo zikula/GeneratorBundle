@@ -10,8 +10,8 @@ $loader = require __DIR__.'/../vendor/autoload.php';
 require_once __DIR__.'/AppKernel.php';
 
 $input = new ArgvInput();
-$env = $input->getParameterOption(array('--env', '-e'), getenv('ZIKULA_ENV') ?: 'dev');
-$debug = getenv('ZIKULA_DEBUG') !== '0' && !$input->hasParameterOption(array('--no-debug', '')) && $env !== 'prod';
+$env = $input->getParameterOption(['--env', '-e'], getenv('ZIKULA_ENV') ?: 'dev');
+$debug = getenv('ZIKULA_DEBUG') !== '0' && !$input->hasParameterOption(['--no-debug', '']) && $env !== 'prod';
 
 $kernel = new AppKernel($env, $debug);
 $application = new Application($kernel);

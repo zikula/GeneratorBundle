@@ -32,9 +32,9 @@ class GenerateDoctrineFormCommand extends GenerateDoctrineCommand
     protected function configure()
     {
         $this
-            ->setDefinition(array(
+            ->setDefinition([
                 new InputArgument('entity', InputArgument::REQUIRED, 'The entity class name to initialize (shortcut notation)'),
-            ))
+            ])
             ->setDescription('Generates a form type class based on a Doctrine entity')
             ->setHelp(<<<EOT
 The <info>doctrine:generate:form</info> command generates a form class based on a Doctrine entity.
@@ -51,7 +51,7 @@ in order to know the file structure of the skeleton
 EOT
             )
             ->setName('doctrine:generate:form')
-            ->setAliases(array('generate:doctrine:form'))
+            ->setAliases(['generate:doctrine:form'])
         ;
     }
 

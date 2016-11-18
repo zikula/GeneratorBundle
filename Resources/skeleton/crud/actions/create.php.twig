@@ -26,7 +26,7 @@
             $em->flush();
 
             {% if 'show' in actions -%}
-                return $this->redirect($this->generateUrl('{{ route_name_prefix }}_show', array('id' => $entity->getId())));
+                return $this->redirect($this->generateUrl('{{ route_name_prefix }}_show', ['id' => $entity->getId()]));
             {%- else -%}
                 return $this->redirect($this->generateUrl('{{ route_name_prefix }}'));
             {%- endif %}
@@ -36,15 +36,15 @@
 
 {% block method_return %}
 {% if 'annotation' == format %}
-        return array(
+        return [
             'entity' => $entity,
-            'form'   => $form->createView(),
-        );
+            'form'   => $form->createView()
+        ];
 {% else %}
-        return $this->render('{{ bundle }}:{{ entity|replace({'\\': '/'}) }}:new.html.twig', array(
+        return $this->render('{{ bundle }}:{{ entity|replace({'\\': '/'}) }}:new.html.twig', [
             'entity' => $entity,
-            'form'   => $form->createView(),
-        ));
+            'form'   => $form->createView()
+        ]);
 {% endif %}
 {% endblock method_return %}
     }

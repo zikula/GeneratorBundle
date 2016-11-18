@@ -7,9 +7,9 @@ class AppKernel extends Kernel
 {
     public function registerBundles()
     {
-        $bundles = array(
+        $bundles = [
             new Zikula\Bundle\GeneratorBundle\ZikulaGeneratorBundle(),
-        );
+        ];
 
         return $bundles;
     }

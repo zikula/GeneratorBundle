@@ -10,9 +10,9 @@ $collection = new RouteCollection();
 {% endblock definition %}
 
 {% block body %}
-$collection->add('{{ extension_alias }}_homepage', new Route('/hello/{name}', array(
+$collection->add('{{ extension_alias }}_homepage', new Route('/hello/{name}', [
     '_controller' => '{{ bundle }}:Default:index',
-)));
+]));
 {% endblock body %}
 
 {% block return %}

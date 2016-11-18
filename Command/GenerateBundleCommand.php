@@ -32,12 +32,12 @@ class GenerateBundleCommand extends GeneratorCommand
     protected function configure()
     {
         $this
-            ->setDefinition(array(
+            ->setDefinition([
                 new InputOption('namespace', '', InputOption::VALUE_REQUIRED, 'The namespace of the module to create'),
                 new InputOption('dir', '', InputOption::VALUE_REQUIRED, 'The directory where to create the module'),
                 new InputOption('module-name', '', InputOption::VALUE_REQUIRED, 'The optional module name'),
                 new InputOption('format', '', InputOption::VALUE_REQUIRED, 'Use the format for configuration files (php, xml, yml, or annotation)'),
-            ))
+            ])
             ->setDescription('Generates a module')
             ->setHelp(<<<EOT
 The <info>generate:module</info> command helps you generates new modules.
@@ -81,7 +81,7 @@ EOT
             }
         }
 
-        foreach (array('namespace', 'dir') as $option) {
+        foreach (['namespace', 'dir'] as $option) {
             if (null === $input->getOption($option)) {
                 throw new \RuntimeException(sprintf('The "%s" option must be provided.', $option));
             }
@@ -89,7 +89,7 @@ EOT
 
         $namespace = Validators::validateBundleNamespace($input->getOption('namespace'));
         if (!$bundle = $input->getOption('module-name')) {
-            $bundle = strtr($namespace, array('\\' => ''));
+            $bundle = strtr($namespace, ['\\' => '']);
         }
         $bundle = Validators::validateBundleName($bundle);
         $dir = Validators::validateTargetDir($input->getOption('dir'), $bundle, $namespace);
@@ -109,7 +109,7 @@ EOT
 
         $output->writeln('Generating the module code: <info>OK</info>');
 
-        $errors = array();
+        $errors = [];
         //$runner = $dialog->getRunner($output, $errors);
 
         // routing
@@ -132,7 +132,7 @@ EOT
         }
 
         if (null === $namespace) {
-            $output->writeln(array(
+            $output->writeln([
                 '',
                 'Your application code must be written in <comment>modules</comment>. This command helps',
                 'you generate them easily.',
@@ -148,9 +148,9 @@ EOT
                 '',
                 'Use <comment>/</comment> instead of <comment>\\ </comment> for the namespace delimiter to avoid any problem.',
                 '',
-            ));
+            ]);
 
-            $namespace = $dialog->askAndValidate($output, $dialog->getQuestion('Module namespace', $input->getOption('namespace')), array('Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateBundleNamespace'), false, $input->getOption('namespace'));
+            $namespace = $dialog->askAndValidate($output, $dialog->getQuestion('Module namespace', $input->getOption('namespace')), ['Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateBundleNamespace'], false, $input->getOption('namespace'));
             $input->setOption('namespace', $namespace);
         }
 
@@ -163,17 +163,17 @@ EOT
         }
 
         if (null === $bundle) {
-            $bundle = strtr($namespace, array('\\Module\\' => '', '\\' => ''));
+            $bundle = strtr($namespace, ['\\Module\\' => '', '\\' => '']);
 
-            $output->writeln(array(
+            $output->writeln([
                 '',
                 'In your code, a module is often referenced by its name. It can be the',
                 'concatenation of all namespace parts but it\'s really up to you to come',
                 'up with a unique name (a good practice is to start with the vendor name).',
                 'Based on the namespace, we suggest <comment>'.$bundle.'</comment>.',
                 '',
-            ));
-            $bundle = $dialog->askAndValidate($output, $dialog->getQuestion('Module name', $bundle), array('Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateBundleName'), false, $bundle);
+            ]);
+            $bundle = $dialog->askAndValidate($output, $dialog->getQuestion('Module name', $bundle), ['Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateBundleName'], false, $bundle);
             $input->setOption('module-name', $bundle);
         }
 
@@ -188,12 +188,12 @@ EOT
         if (null === $dir) {
             $dir = dirname($this->getContainer()->getParameter('kernel.root_dir')).'/src';
 
-            $output->writeln(array(
+            $output->writeln([
                 '',
                 'The module can be generated anywhere. The suggested default directory uses',
                 'the standard conventions.',
                 '',
-            ));
+            ]);
             $dir = $dialog->askAndValidate($output, $dialog->getQuestion('Target directory', $dir), function ($dir) use ($bundle, $namespace) { return Validators::validateTargetDir($dir, $bundle, $namespace); }, false, $dir);
             $input->setOption('dir', $dir);
         }
@@ -207,31 +207,31 @@ EOT
         }
 
         if (null === $format) {
-            $output->writeln(array(
-                                  '',
-                                  'Determine the format to use for the generated configuration.',
-                                  '',
-                             ));
-            $format = $dialog->askAndValidate($output, $dialog->getQuestion('Configuration format (yml, xml, php, or annotation)', $input->getOption('format')), array('Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateFormat'), false, $input->getOption('format'));
+            $output->writeln([
+                '',
+                'Determine the format to use for the generated configuration.',
+                '',
+            ]);
+            $format = $dialog->askAndValidate($output, $dialog->getQuestion('Configuration format (yml, xml, php, or annotation)', $input->getOption('format')), ['Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateFormat'], false, $input->getOption('format'));
             $input->setOption('format', $format);
         }
 
         // optional files to generate
-        $output->writeln(array(
-                              '',
-                              'To help you get started faster, the command can generate some',
-                              'code snippets for you.',
-                              '',
-                         ));
+        $output->writeln([
+            '',
+            'To help you get started faster, the command can generate some',
+            'code snippets for you.',
+            '',
+        ]);
 
         // summary
-        $output->writeln(array(
-                              '',
-                              $this->getHelper('formatter')->formatBlock('Summary before generation', 'bg=blue;fg=white', true),
-                              '',
-                              sprintf("You are going to generate a \"<info>%s\\%s</info>\" module\nin \"<info>%s</info>\" using the \"<info>%s</info>\" format.", $namespace, $bundle, $dir, $format),
-                              '',
-                         ));
+        $output->writeln([
+            '',
+            $this->getHelper('formatter')->formatBlock('Summary before generation', 'bg=blue;fg=white', true),
+            '',
+            sprintf("You are going to generate a \"<info>%s\\%s</info>\" module\nin \"<info>%s</info>\" using the \"<info>%s</info>\" format.", $namespace, $bundle, $dir, $format),
+            '',
+        ]);
     }
 
 

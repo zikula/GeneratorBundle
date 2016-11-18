@@ -23,7 +23,7 @@ abstract class GenerateCommandTest extends \PHPUnit_Framework_TestCase
         $dialog = new DialogHelper();
         $dialog->setInputStream($this->getInputStream($input));
 
-        return new HelperSet(array(new FormatterHelper(), $dialog));
+        return new HelperSet([new FormatterHelper(), $dialog]);
     }
 
     protected function getBundle()
@@ -58,7 +58,7 @@ abstract class GenerateCommandTest extends \PHPUnit_Framework_TestCase
         $kernel
             ->expects($this->any())
             ->method('getBundles')
-            ->will($this->returnValue(array($this->getBundle())))
+            ->will($this->returnValue([$this->getBundle()]))
         ;
 
         $filesystem = $this->getMock('Symfony\Component\Filesystem\Filesystem');

@@ -30,7 +30,7 @@ class GenerateDoctrineEntityCommand extends GenerateDoctrineCommand
     {
         $this
             ->setName('doctrine:generate:entity')
-            ->setAliases(array('generate:doctrine:entity'))
+            ->setAliases(['generate:doctrine:entity'])
             ->setDescription('Generates a new Doctrine entity inside a module')
             ->addOption('entity', null, InputOption::VALUE_REQUIRED, 'The entity class name to initialize (shortcut notation)')
             ->addOption('fields', null, InputOption::VALUE_REQUIRED, 'The fields to create with the new entity')
@@ -97,7 +97,7 @@ EOT
 
         $output->writeln('Generating the entity code: <info>OK</info>');
 
-        $dialog->writeGeneratorSummary($output, array());
+        $dialog->writeGeneratorSummary($output, []);
     }
 
     protected function interact(InputInterface $input, OutputInterface $output)
@@ -106,19 +106,19 @@ EOT
         $dialog->writeSection($output, 'Welcome to the Doctrine2 entity generator');
 
         // namespace
-        $output->writeln(array(
+        $output->writeln([
             '',
             'This command helps you generate Doctrine2 entities.',
             '',
             'First, you need to give the entity name you want to generate.',
             'You must use the shortcut notation like <comment>AcmeBlogModule:Post</comment>.',
             ''
-        ));
+        ]);
 
         $bundleNames = array_keys($this->getContainer()->get('kernel')->getBundles());
 
         while (true) {
-            $entity = $dialog->askAndValidate($output, $dialog->getQuestion('The Entity shortcut name', $input->getOption('entity')), array('Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateEntityName'), false, $input->getOption('entity'), $bundleNames);
+            $entity = $dialog->askAndValidate($output, $dialog->getQuestion('The Entity shortcut name', $input->getOption('entity')), ['Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateEntityName'], false, $input->getOption('entity'), $bundleNames);
 
             list($bundle, $entity) = $this->parseShortcutNotation($entity);
 
@@ -143,15 +143,15 @@ EOT
         $input->setOption('entity', $bundle.':'.$entity);
 
         // format
-        $output->writeln(array(
+        $output->writeln([
             '',
             'Determine the format to use for the mapping information.',
             '',
-        ));
+        ]);
 
-        $formats = array('yml', 'xml', 'php', 'annotation');
+        $formats = ['yml', 'xml', 'php', 'annotation'];
 
-        $format = $dialog->askAndValidate($output, $dialog->getQuestion('Configuration format (yml, xml, php, or annotation)', $input->getOption('format')), array('Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateFormat'), false, $input->getOption('format'), $formats);
+        $format = $dialog->askAndValidate($output, $dialog->getQuestion('Configuration format (yml, xml, php, or annotation)', $input->getOption('format')), ['Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateFormat'], false, $input->getOption('format'), $formats);
         $input->setOption('format', $format);
 
         // fields
@@ -163,14 +163,14 @@ EOT
         $input->setOption('with-repository', $withRepository);
 
         // summary
-        $output->writeln(array(
+        $output->writeln([
             '',
             $this->getHelper('formatter')->formatBlock('Summary before generation', 'bg=blue;fg=white', true),
             '',
             sprintf("You are going to generate a \"<info>%s:%s</info>\" Doctrine2 entity", $bundle, $entity),
             sprintf("using the \"<info>%s</info>\" format.", $format),
             '',
-        ));
+        ]);
     }
 
     private function parseFields($input)
@@ -179,7 +179,7 @@ EOT
             return $input;
         }
 
-        $fields = array();
+        $fields = [];
         foreach (explode(' ', $input) as $value) {
             $elements = explode(':', $value);
             $name = $elements[0];
@@ -189,7 +189,7 @@ EOT
                 $type = isset($matches[1][0]) ? $matches[1][0] : $type;
                 $length = isset($matches[2][0]) ? $matches[2][0] : null;
 
-                $fields[$name] = array('fieldName' => $name, 'type' => $type, 'length' => $length);
+                $fields[$name] = ['fieldName' => $name, 'type' => $type, 'length' => $length];
             }
         }
 
@@ -199,12 +199,12 @@ EOT
     private function addFields(InputInterface $input, OutputInterface $output, DialogHelper $dialog)
     {
         $fields = $this->parseFields($input->getOption('fields'));
-        $output->writeln(array(
+        $output->writeln([
             '',
             'Instead of starting with a blank entity, you can add some fields now.',
             'Note that the primary key will be added automatically (named <comment>id</comment>).',
             '',
-        ));
+        ]);
         $output->write('<info>Available types:</info> ');
 
         $types = array_keys(Type::getTypesMap());
@@ -238,9 +238,9 @@ EOT
                 return $length;
             }
 
-            $result = filter_var($length, FILTER_VALIDATE_INT, array(
-                'options' => array('min_range' => 1)
-            ));
+            $result = filter_var($length, FILTER_VALIDATE_INT, [
+                'options' => ['min_range' => 1]
+            ]);
 
             if (false === $result) {
                 throw new \InvalidArgumentException(sprintf('Invalid length "%s".', $length));
@@ -283,7 +283,7 @@ EOT
 
             $type = $dialog->askAndValidate($output, $dialog->getQuestion('Field type', $defaultType), $fieldValidator, false, $defaultType, $types);
 
-            $data = array('columnName' => $columnName, 'fieldName' => lcfirst(Container::camelize($columnName)), 'type' => $type);
+            $data = ['columnName' => $columnName, 'fieldName' => lcfirst(Container::camelize($columnName)), 'type' => $type];
 
             if ($type == 'string') {
                 $data['length'] = $dialog->askAndValidate($output, $dialog->getQuestion('Field length', 255), $lengthValidator, false, 255);

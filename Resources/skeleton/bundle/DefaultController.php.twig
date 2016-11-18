@@ -24,9 +24,9 @@ class DefaultController extends AbstractController
     public function indexAction($name = 'no name')
     {
         {% if 'annotation' != format -%}
-        return $this->render('{{ bundle }}:Default:index.html.twig', array('name' => $name));
+        return $this->render('{{ bundle }}:Default:index.html.twig', ['name' => $name]);
         {%- else -%}
-        return array('name' => $name);
+        return ['name' => $name];
         {%- endif %}
 
     }

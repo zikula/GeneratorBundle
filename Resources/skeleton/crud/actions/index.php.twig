@@ -24,13 +24,13 @@
 
 {% block method_return %}
 {% if 'annotation' == format %}
-        return array(
-            'entities' => $entities,
-        );
+        return [
+            'entities' => $entities
+        ];
 {% else %}
-        return $this->render('{{ bundle }}:{{ entity|replace({'\\': '/'}) }}:index.html.twig', array(
-            'entities' => $entities,
-        ));
+        return $this->render('{{ bundle }}:{{ entity|replace({'\\': '/'}) }}:index.html.twig', [
+            'entities' => $entities
+        ]);
 {% endif %}
 {% endblock method_return %}
     }
