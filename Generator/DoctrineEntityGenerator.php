@@ -41,7 +41,7 @@ class DoctrineEntityGenerator extends Generator
         // configure the bundle (needed if the bundle does not contain any Entities yet)
         $config = $this->registry->getEntityManager(null)->getConfiguration();
         $config->setEntityNamespaces(array_merge(
-            array($bundle->getName() => $bundle->getNamespace().'\\Entity'),
+            [$bundle->getName() => $bundle->getNamespace().'\\Entity'],
             $config->getEntityNamespaces()
         ));
 
@@ -55,7 +55,7 @@ class DoctrineEntityGenerator extends Generator
         if ($withRepository) {
             $class->customRepositoryClassName = $entityClass.'Repository';
         }
-        $class->mapField(array('fieldName' => 'id', 'type' => 'integer', 'id' => true));
+        $class->mapField(['fieldName' => 'id', 'type' => 'integer', 'id' => true]);
         $class->setIdGeneratorType(ClassMetadataInfo::GENERATOR_TYPE_AUTO);
         foreach ($fields as $field) {
             $class->mapField($field);

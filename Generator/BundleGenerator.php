@@ -36,7 +36,7 @@ class BundleGenerator extends Generator
                 throw new \RuntimeException(sprintf('Unable to generate the module as the target directory "%s" exists but is a file.', realpath($dir)));
             }
             $files = scandir($dir);
-            if ($files != array('.', '..')) {
+            if ($files != ['.', '..']) {
                 throw new \RuntimeException(sprintf('Unable to generate the module as the target directory "%s" is not empty.', realpath($dir)));
             }
             if (!is_writable($dir)) {
@@ -48,7 +48,7 @@ class BundleGenerator extends Generator
         $namespaceParts = explode('\\', $namespace);
         $vendorName = $namespaceParts[0];
         $bundleName = substr($bundle, strlen($vendorName), strlen($bundle));
-        $parameters = array(
+        $parameters = [
             'vendor'           => $vendorName,
             'namespace'        => $namespace,
             'bundle'           => $bundle,
@@ -58,7 +58,7 @@ class BundleGenerator extends Generator
             'format'           => $format,
             'bundle_basename'  => $basename,
             'extension_alias'  => Container::underscore($basename),
-        );
+        ];
 
         $this->renderFile('bundle/.gitignore.twig', $dir.'/.gitignore', $parameters);
         $this->renderFile('bundle/.travis.yml.twig', $dir.'/.travis.yml', $parameters);

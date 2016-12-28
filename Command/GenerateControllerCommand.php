@@ -30,7 +30,7 @@ class GenerateControllerCommand extends GeneratorCommand
     public function configure()
     {
         $this
-            ->setDefinition(array(
+            ->setDefinition([
                 new InputOption(
                     'controller',
                     '',
@@ -57,7 +57,7 @@ class GenerateControllerCommand extends GeneratorCommand
                     InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
                     'The actions in the controller'
                 ),
-            ))
+            ])
             ->setDescription('Generates a controller')
             ->setHelp(<<<EOT
 The <info>generate:controller</info> command helps you generates new controllers
@@ -123,7 +123,7 @@ EOT
 
         $output->writeln('Generating the bundle code: <info>OK</info>');
 
-        $dialog->writeGeneratorSummary($output, array());
+        $dialog->writeGeneratorSummary($output, []);
     }
 
     public function interact(InputInterface $input, OutputInterface $output)
@@ -132,7 +132,7 @@ EOT
         $dialog->writeSection($output, 'Welcome to the Zikula controller generator');
 
         // namespace
-        $output->writeln(array(
+        $output->writeln([
             '',
             'Every page, and even sections of a page, are rendered by a <comment>controller</comment>.',
             'This command helps you generate them easily.',
@@ -140,10 +140,10 @@ EOT
             'First, you need to give the controller name you want to generate.',
             'You must use the shortcut notation like <comment>AcmeBlogModule:Post</comment>',
             '',
-        ));
+        ]);
 
         while (true) {
-            $controller = $dialog->askAndValidate($output, $dialog->getQuestion('Controller name', $input->getOption('controller')), array('Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateControllerName'), false, $input->getOption('controller'));
+            $controller = $dialog->askAndValidate($output, $dialog->getQuestion('Controller name', $input->getOption('controller')), ['Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateControllerName'], false, $input->getOption('controller'));
             list($bundle, $controller) = $this->parseShortcutNotation($controller);
 
             try {
@@ -162,17 +162,17 @@ EOT
 
         // routing format
         $defaultFormat = (null !== $input->getOption('route-format') ? $input->getOption('route-format') : 'annotation');
-        $output->writeln(array(
+        $output->writeln([
             '',
             'Determine the format to use for the routing.',
             '',
-        ));
-        $routeFormat = $dialog->askAndValidate($output, $dialog->getQuestion('Routing format (php, xml, yml, annotation)', $defaultFormat), array('Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateFormat'), false, $defaultFormat);
+        ]);
+        $routeFormat = $dialog->askAndValidate($output, $dialog->getQuestion('Routing format (php, xml, yml, annotation)', $defaultFormat), ['Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateFormat'], false, $defaultFormat);
         $input->setOption('route-format', $routeFormat);
 
         // templating format
         $validateTemplateFormat = function($format) {
-            if (!in_array($format, array('twig', 'php'))) {
+            if (!in_array($format, ['twig', 'php'])) {
                 throw new \InvalidArgumentException(sprintf('The template format must be twig or php, "%s" given', $format));
             }
 
@@ -180,11 +180,11 @@ EOT
         };
 
         $defaultFormat = (null !== $input->getOption('template-format') ? $input->getOption('template-format') : 'twig');
-        $output->writeln(array(
+        $output->writeln([
             '',
             'Determine the format to use for templating.',
             '',
-        ));
+        ]);
         $templateFormat = $dialog->askAndValidate($output, $dialog->getQuestion('Template format (twig, php)', $defaultFormat), $validateTemplateFormat, false, $defaultFormat);
         $input->setOption('template-format', $templateFormat);
 
@@ -192,25 +192,25 @@ EOT
         $input->setOption('actions', $this->addActions($input, $output, $dialog));
 
         // summary
-        $output->writeln(array(
+        $output->writeln([
             '',
             $this->getHelper('formatter')->formatBlock('Summary before generation', 'bg=blue;fg-white', true),
             '',
             sprintf('You are going to generate a "<info>%s:%s</info>" controller', $bundle, $controller),
             sprintf('using the "<info>%s</info>" format for the routing and the "<info>%s</info>" format', $routeFormat, $templateFormat),
             'for templating',
-        ));
+        ]);
     }
 
     public function addActions(InputInterface $input, OutputInterface $output, DialogHelper $dialog)
     {
-        $output->writeln(array(
+        $output->writeln([
             '',
             'Instead of starting with a blank controller, you can add some actions now. An action',
             'is a PHP function or method that executes, for example, when a given route is matched.',
             'Actions should be suffixed by <comment>Action</comment>.',
             '',
-        ));
+        ]);
 
         $templateNameValidator = function($name) {
             if ('default' == $name) {
@@ -257,12 +257,12 @@ EOT
             $template = $dialog->askAndValidate($output, $dialog->getQuestion('Templatename (optional)', $defaultTemplate), $templateNameValidator, false, 'default');
 
             // adding action
-            $actions[$actionName] = array(
+            $actions[$actionName] = [
                 'name'         => $actionName,
                 'route'        => $route,
                 'placeholders' => $placeholders,
                 'template'     => $template,
-            );
+            ];
         }
 
         return $actions;
@@ -274,7 +274,7 @@ EOT
             return $actions;
         }
 
-        $newActions = array();
+        $newActions = [];
 
         foreach (explode(' ', $actions) as $action) {
             $data = explode(':', $action);
@@ -290,18 +290,18 @@ EOT
             if ($route) {
                 $placeholders = $this->getPlaceholdersFromRoute($route);
             } else {
-                $placeholders = array();
+                $placeholders = [];
             }
 
             // template
             $template = (0 < count($data) && '' != $data[0]) ? implode(':', $data) : 'default';
 
-            $newActions[$name] = array(
+            $newActions[$name] = [
                 'name'         => $name,
                 'route'        => $route,
                 'placeholders' => $placeholders,
-                'template'     => $template,
-            );
+                'template'     => $template
+            ];
         }
 
         return $newActions;
@@ -323,7 +323,7 @@ EOT
             throw new \InvalidArgumentException(sprintf('The controller name must contain a : ("%s" given, expecting something like AcmeBlogModule:Post)', $entity));
         }
 
-        return array(substr($entity, 0, $pos), substr($entity, $pos + 1));
+        return [substr($entity, 0, $pos), substr($entity, $pos + 1)];
     }
 
     protected function createGenerator()

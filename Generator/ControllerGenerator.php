@@ -33,7 +33,7 @@ class ControllerGenerator extends Generator
         $this->filesystem = $filesystem;
     }
 
-    public function generate(BundleInterface $bundle, $controller, $routeFormat, $templateFormat, array $actions = array())
+    public function generate(BundleInterface $bundle, $controller, $routeFormat, $templateFormat, array $actions = [])
     {
         $dir = $bundle->getPath();
         $controllerFile = $dir.'/Controller/'.$controller.'Controller.php';
@@ -41,15 +41,15 @@ class ControllerGenerator extends Generator
             throw new \RuntimeException(sprintf('Controller "%s" already exists', $controller));
         }
 
-        $parameters = array(
+        $parameters = [
             'namespace'  => $bundle->getNamespace(),
             'bundle'     => $bundle->getName(),
-            'format'     => array(
+            'format'     => [
                 'routing'    => $routeFormat,
                 'templating' => $templateFormat,
-            ),
+            ],
             'controller' => $controller,
-        );
+        ];
 
         foreach ($actions as $i => $action) {
             // get the actioname without the sufix Action (for the template logical name)
@@ -144,9 +144,9 @@ EOT;
                 }
 
                 $content = substr($content, 0, $pointer);
-                $content .= sprintf("%s->add('%s', new Route('%s', array(", $collection[1], $name, $action['route']);
+                $content .= sprintf("%s->add('%s', new Route('%s', [", $collection[1], $name, $action['route']);
                 $content .= sprintf("\n    '_controller' => '%s',", $controller);
-                $content .= "\n)));\n\nreturn ".$collection[1];
+                $content .= "\n]));\n\nreturn ".$collection[1];
             } else {
                 // new file
                 $content = <<<EOT
@@ -156,9 +156,9 @@ use Symfony\Component\Routing\Route;
 
 \$collection = new RouteCollection();
 EOT;
-                $content .= sprintf("\n\$collection->add('%s', new Route('%s', array(", $name, $action['route']);
+                $content .= sprintf("\n\$collection->add('%s', new Route('%s', [", $name, $action['route']);
                 $content .= sprintf("\n    '_controller' => '%s',", $controller);
-                $content .= "\n)));\n\nreturn \$collection";
+                $content .= "\n]));\n\nreturn \$collection";
             }
         }
 
@@ -185,7 +185,7 @@ EOT;
 
     protected function parseLogicalTemplateName($logicalname, $part = '')
     {
-        $data = array();
+        $data = [];
 
         list($data['bundle'], $data['controller'], $data['template']) = explode(':', $logicalname);
 

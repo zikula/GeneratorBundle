@@ -36,13 +36,13 @@ class GenerateDoctrineCrudCommand extends GenerateDoctrineCommand
     protected function configure()
     {
         $this
-            ->setDefinition(array(
+            ->setDefinition([
                 new InputOption('entity', '', InputOption::VALUE_REQUIRED, 'The entity class name to initialize (shortcut notation)'),
                 new InputOption('route-prefix', '', InputOption::VALUE_REQUIRED, 'The route prefix'),
                 new InputOption('with-write', '', InputOption::VALUE_NONE, 'Whether or not to generate create, new and delete actions'),
                 new InputOption('format', '', InputOption::VALUE_REQUIRED, 'Use the format for configuration files (php, xml, yml, or annotation)', 'annotation'),
                 new InputOption('overwrite', '', InputOption::VALUE_NONE, 'Do not stop the generation if crud controller already exist, thus overwriting all generated files'),
-            ))
+            ])
             ->setDescription('Generates a CRUD based on a Doctrine entity')
             ->setHelp(<<<EOT
 The <info>doctrine:generate:crud</info> command generates a CRUD based on a Doctrine entity.
@@ -70,7 +70,7 @@ in order to know the file structure of the skeleton
 EOT
             )
             ->setName('doctrine:generate:crud')
-            ->setAliases(array('generate:doctrine:crud'))
+            ->setAliases(['generate:doctrine:crud'])
         ;
     }
 
@@ -108,7 +108,7 @@ EOT
 
         $output->writeln('Generating the CRUD code: <info>OK</info>');
 
-        $errors = array();
+        $errors = [];
         $runner = $dialog->getRunner($output, $errors);
 
         // form
@@ -131,7 +131,7 @@ EOT
         $dialog->writeSection($output, 'Welcome to the Doctrine2 CRUD generator');
 
         // namespace
-        $output->writeln(array(
+        $output->writeln([
             '',
             'This command helps you generate CRUD controllers and templates.',
             '',
@@ -141,9 +141,9 @@ EOT
             '',
             'You must use the shortcut notation like <comment>AcmeBlogModule:Post</comment>.',
             '',
-        ));
+        ]);
 
-        $entity = $dialog->askAndValidate($output, $dialog->getQuestion('The Entity shortcut name', $input->getOption('entity')), array('Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateEntityName'), false, $input->getOption('entity'));
+        $entity = $dialog->askAndValidate($output, $dialog->getQuestion('The Entity shortcut name', $input->getOption('entity')), ['Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateEntityName'], false, $input->getOption('entity'));
         $input->setOption('entity', $entity);
         list($bundle, $entity) = $this->parseShortcutNotation($entity);
 
@@ -153,45 +153,45 @@ EOT
 
         // write?
         $withWrite = $input->getOption('with-write') ?: false;
-        $output->writeln(array(
+        $output->writeln([
             '',
             'By default, the generator creates two actions: list and show.',
             'You can also ask it to generate "write" actions: new, update, and delete.',
             '',
-        ));
+        ]);
         $withWrite = $dialog->askConfirmation($output, $dialog->getQuestion('Do you want to generate the "write" actions', $withWrite ? 'yes' : 'no', '?'), $withWrite);
         $input->setOption('with-write', $withWrite);
 
         // format
         $format = $input->getOption('format');
-        $output->writeln(array(
+        $output->writeln([
             '',
             'Determine the format to use for the generated CRUD.',
             '',
-        ));
-        $format = $dialog->askAndValidate($output, $dialog->getQuestion('Configuration format (yml, xml, php, or annotation)', $format), array('Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateFormat'), false, $format);
+        ]);
+        $format = $dialog->askAndValidate($output, $dialog->getQuestion('Configuration format (yml, xml, php, or annotation)', $format), ['Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateFormat'], false, $format);
         $input->setOption('format', $format);
 
         // route prefix
         $prefix = $this->getRoutePrefix($input, $entity);
-        $output->writeln(array(
+        $output->writeln([
             '',
             'Determine the routes prefix (all the routes will be "mounted" under this',
             'prefix: /prefix/, /prefix/new, ...).',
             '',
-        ));
+        ]);
         $prefix = $dialog->ask($output, $dialog->getQuestion('Routes prefix', '/'.$prefix), '/'.$prefix);
         $input->setOption('route-prefix', $prefix);
 
         // summary
-        $output->writeln(array(
+        $output->writeln([
             '',
             $this->getHelper('formatter')->formatBlock('Summary before generation', 'bg=blue;fg=white', true),
             '',
             sprintf("You are going to generate a CRUD controller for \"<info>%s:%s</info>\"", $bundle, $entity),
             sprintf("using the \"<info>%s</info>\" format.", $format),
             '',
-        ));
+        ]);
     }
 
     /**
@@ -226,20 +226,20 @@ EOT
             $help = sprintf("        <comment>resource: \"@%s/Resources/config/routing/%s.%s\"</comment>\n", $bundle->getName(), strtolower(str_replace('\\', '_', $entity)), $format);
             $help .= sprintf("        <comment>prefix:   /%s</comment>\n", $prefix);
 
-            return array(
+            return [
                 '- Import the bundle\'s routing resource in the bundle routing file',
                 sprintf('  (%s).', $bundle->getPath().'/Resources/config/routing.yml'),
                 '',
                 sprintf('    <comment>%s:</comment>', $bundle->getName().('' !== $prefix ? '_'.str_replace('/', '_', $prefix) : '')),
                 $help,
                 '',
-            );
+            ];
         }
     }
 
     protected function getRoutePrefix(InputInterface $input, $entity)
     {
-        $prefix = $input->getOption('route-prefix') ?: strtolower(str_replace(array('\\', '/'), '_', $entity));
+        $prefix = $input->getOption('route-prefix') ?: strtolower(str_replace(['\\', '/'], '_', $entity));
 
         if ($prefix && '/' === $prefix[0]) {
             $prefix = substr($prefix, 1);

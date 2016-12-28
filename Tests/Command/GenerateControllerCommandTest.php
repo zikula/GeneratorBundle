@@ -43,36 +43,36 @@ class GenerateControllerCommandTest extends GenerateCommandTest
     {
         $tmp = sys_get_temp_dir();
 
-        return array(
-            array(array(), "AcmeBlogBundle:Post\n", array('Post', 'annotation', 'twig', array())),
-            array(array('--controller' => 'AcmeBlogBundle:Post'), '', array('Post', 'annotation', 'twig', array())),
+        return [
+            [[], "AcmeBlogBundle:Post\n", ['Post', 'annotation', 'twig', []]],
+            [['--controller' => 'AcmeBlogBundle:Post'], '', ['Post', 'annotation', 'twig', []]],
 
-            array(array(), "AcmeBlogBundle:Post\nyml\nphp\n", array('Post', 'yml', 'php', array())),
+            [[], "AcmeBlogBundle:Post\nyml\nphp\n", ['Post', 'yml', 'php', []]],
 
-            array(array(), "AcmeBlogBundle:Post\nyml\nphp\nshowAction\n\n\ngetListAction\n/_getlist/{max}\nAcmeBlogBundle:Lists:post.html.php\n", array('Post', 'yml', 'php', array(
-                'showAction' => array(
+            [[], "AcmeBlogBundle:Post\nyml\nphp\nshowAction\n\n\ngetListAction\n/_getlist/{max}\nAcmeBlogBundle:Lists:post.html.php\n", ['Post', 'yml', 'php', [
+                'showAction' => [
                     'name' => 'showAction',
                     'route' => '/show',
-                    'placeholders' => array(),
+                    'placeholders' => [],
                     'template' => 'default',
-                ),
-                'getListAction' => array(
+                ],
+                'getListAction' => [
                     'name' => 'getListAction',
                     'route' => '/_getlist/{max}',
-                    'placeholders' => array('max'),
+                    'placeholders' => ['max'],
                     'template' => 'AcmeBlogBundle:Lists:post.html.php',
-                ),
-            ))),
+                ],
+            ]]],
 
-            array(array('--route-format' => 'xml', '--template-format' => 'php', '--actions' => 'showAction:/{slug}:AcmeBlogBundle:article.html.php'), 'AcmeBlogBundle:Post', array('Post', 'xml', 'php', array(
-                'showAction' => array(
+            [['--route-format' => 'xml', '--template-format' => 'php', '--actions' => 'showAction:/{slug}:AcmeBlogBundle:article.html.php'], 'AcmeBlogBundle:Post', ['Post', 'xml', 'php', [
+                'showAction' => [
                     'name' => 'showAction',
                     'route' => '/{slug}',
-                    'placeholders' => array('slug'),
+                    'placeholders' => ['slug'],
                     'template' => 'AcmeBlogBundle:article.html.php',
-                ),
-            ))),
-        );
+                ],
+            ]]],
+        ];
     }
 
     /**
@@ -90,52 +90,52 @@ class GenerateControllerCommandTest extends GenerateCommandTest
         ;
 
         $tester = $this->getCommandTester($generator);
-        $tester->execute($options, array('interactive' => false));
+        $tester->execute($options, ['interactive' => false]);
     }
 
     public function getNonInteractiveCommandData()
     {
         $tmp = sys_get_temp_dir();
 
-        return array(
-            array(array('--controller' => 'AcmeBlogBundle:Post'), array('Post', 'annotation', 'twig', array())),
-            array(array('--controller' => 'AcmeBlogBundle:Post', '--route-format' => 'yml', '--template-format' => 'php'), array('Post', 'yml', 'php', array())),
-            array(array('--controller' => 'AcmeBlogBundle:Post', '--actions' => 'showAction getListAction:/_getlist/{max}:AcmeBlogBundle:List:post.html.twig createAction:/admin/create'), array('Post', 'annotation', 'twig', array(
-                'showAction' => array(
+        return [
+            [['--controller' => 'AcmeBlogBundle:Post'], ['Post', 'annotation', 'twig', []]],
+            [['--controller' => 'AcmeBlogBundle:Post', '--route-format' => 'yml', '--template-format' => 'php'], ['Post', 'yml', 'php', []]],
+            [['--controller' => 'AcmeBlogBundle:Post', '--actions' => 'showAction getListAction:/_getlist/{max}:AcmeBlogBundle:List:post.html.twig createAction:/admin/create'], ['Post', 'annotation', 'twig', [
+                'showAction' => [
                     'name' => 'showAction',
                     'route' => '/show',
-                    'placeholders' => array(),
+                    'placeholders' => [],
                     'template' => 'default',
-                ),
-                'getListAction' => array(
+                ],
+                'getListAction' => [
                     'name' => 'getListAction',
                     'route' => '/_getlist/{max}',
-                    'placeholders' => array('max'),
+                    'placeholders' => ['max'],
                     'template' => 'AcmeBlogBundle:List:post.html.twig',
-                ),
-                'createAction' => array(
+                ],
+                'createAction' => [
                     'name' => 'createAction',
                     'route' => '/admin/create',
-                    'placeholders' => array(),
+                    'placeholders' => [],
                     'template' => 'default',
-                ),
-            ))),
-            array(array('--controller' => 'AcmeBlogBundle:Post', '--route-format' => 'xml', '--template-format' => 'php', '--actions' => 'showAction::'), array('Post', 'xml', 'php', array(
-                'showAction' => array(
+                ],
+            ]]],
+            [['--controller' => 'AcmeBlogBundle:Post', '--route-format' => 'xml', '--template-format' => 'php', '--actions' => 'showAction::'], ['Post', 'xml', 'php', [
+                'showAction' => [
                     'name' => 'showAction',
                     'route' => '/show',
-                    'placeholders' => array(),
+                    'placeholders' => [],
                     'template' => 'default',
-                ),
-            ))),
-        );
+                ],
+            ]]],
+        ];
     }
 
     protected function getCommand($generator, $input)
     {
         $command = $this
             ->getMockBuilder('Sensio\Bundle\GeneratorBundle\Command\GenerateControllerCommand')
-            ->setMethods(array('generateRouting'))
+            ->setMethods(['generateRouting'])
             ->getMock()
         ;
 
@@ -180,7 +180,7 @@ class GenerateControllerCommandTest extends GenerateCommandTest
         $this->generator = $this
             ->getMockBuilder('Sensio\Bundle\GeneratorBundle\Generator\ControllerGenerator')
             ->disableOriginalConstructor()
-            ->setMethods(array('generate'))
+            ->setMethods(['generate'])
             ->getMock()
         ;
     }

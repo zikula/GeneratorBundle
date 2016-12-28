@@ -19,65 +19,65 @@ class ControllerGeneratorTest extends GeneratorTest
     {
         $this->getGenerator()->generate($this->getBundle(), 'Welcome', 'annotation', 'twig');
 
-        $files = array(
+        $files = [
             'Controller/WelcomeController.php',
             'Tests/Controller/WelcomeControllerTest.php',
-        );
+        ];
         foreach ($files as $file) {
             $this->assertTrue(file_exists($this->tmpDir.'/'.$file), sprintf('%s has been generated', $file));
         }
 
         $content = file_get_contents($this->tmpDir.'/Controller/WelcomeController.php');
-        $strings = array(
+        $strings = [
             'namespace Foo\\BarBundle\\Controller',
             'class WelcomeController',
-        );
+        ];
         foreach ($strings as $string) {
             $this->assertContains($string, $content);
         }
 
         $content = file_get_contents($this->tmpDir.'/Tests/Controller/WelcomeControllerTest.php');
-        $strings = array(
+        $strings = [
             'namespace Foo\\BarBundle\\Tests\\Controller',
             'class WelcomeControllerTest',
-        );
+        ];
     }
 
     public function testGenerateActions()
     {
         $generator = $this->getGenerator();
-        $actions = array(
-            0 => array(
+        $actions = [
+            0 => [
                 'name' => 'showPageAction',
                 'route' => '/{id}/{slug}',
-                'placeholders' => array('id', 'slug'),
+                'placeholders' => ['id', 'slug'],
                 'template' => 'default',
-            ),
-            1 => array(
+            ],
+            1 => [
                 'name' => 'getListOfPagesAction',
                 'route' => '/_get-pages/{max_count}',
-                'placeholders' => array('max_count'),
+                'placeholders' => ['max_count'],
                 'template' => 'FooBarBundle:Page:pages_list.html.twig',
-            ),
-        );
+            ]
+        ];
 
         $generator->generate($this->getBundle(), 'Page', 'annotation', 'twig', $actions);
 
-        $files = array(
+        $files = [
             'Resources/views/Page/showPage.html.twig',
             'Resources/views/Page/pages_list.html.twig',
-        );
+        ];
         foreach ($files as $file) {
             $this->assertTrue(file_exists($this->tmpDir.'/'.$file), sprintf('%s has been generated', $file));
         }
 
         $content = file_get_contents($this->tmpDir.'/Controller/PageController.php');
-        $strings = array(
+        $strings = [
             'public function showPageAction($id, $slug)',
             'public function getListOfPagesAction($max_count)',
             '@Template()',
-            '@Template("FooBarBundle:Page:pages_list.html.twig")',
-        );
+            '@Template("FooBarBundle:Page:pages_list.html.twig")'
+        ];
         foreach ($strings as $string) {
             $this->assertContains($string, $content);
         }
@@ -87,19 +87,19 @@ class ControllerGeneratorTest extends GeneratorTest
     {
         $generator = $this->getGenerator();
 
-        $generator->generate($this->getBundle(), 'Page', 'yml', 'php', array(
-            1 => array(
+        $generator->generate($this->getBundle(), 'Page', 'yml', 'php', [
+            1 => [
                 'name' => 'showPageAction',
                 'route' => '/{slug}',
-                'placeholders' => array('slug'),
-                'template' => 'FooBarBundle:Page:showPage.html.php',
-            ),
-        ));
+                'placeholders' => ['slug'],
+                'template' => 'FooBarBundle:Page:showPage.html.php'
+            ],
+        ]);
 
-        $files = array(
+        $files = [
             'Resources/views/Page/showPage.html.php',
-            'Resources/config/routing.yml',
-        );
+            'Resources/config/routing.yml'
+        ];
         foreach ($files as $file) {
             $this->assertTrue(file_exists($this->tmpDir.'/'.$file), $file.' has been generated');
         }

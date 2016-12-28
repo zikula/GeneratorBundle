@@ -33,23 +33,23 @@
             $em->persist($entity);
             $em->flush();
 
-            return $this->redirect($this->generateUrl('{{ route_name_prefix }}_edit', array('id' => $id)));
+            return $this->redirect($this->generateUrl('{{ route_name_prefix }}_edit', ['id' => $id]));
         }
 {% endblock method_body %}
 
 {% block method_return %}
 {% if 'annotation' == format %}
-        return array(
+        return [
             'entity'      => $entity,
             'edit_form'   => $editForm->createView(),
-            'delete_form' => $deleteForm->createView(),
-        );
+            'delete_form' => $deleteForm->createView()
+        ];
 {% else %}
-        return $this->render('{{ bundle }}:{{ entity|replace({'\\': '/'}) }}:edit.html.twig', array(
+        return $this->render('{{ bundle }}:{{ entity|replace({'\\': '/'}) }}:edit.html.twig', [
             'entity'      => $entity,
             'edit_form'   => $editForm->createView(),
-            'delete_form' => $deleteForm->createView(),
-        ));
+            'delete_form' => $deleteForm->createView()
+        ]);
 {% endif %}
 {% endblock method_return %}
     }

@@ -14,11 +14,11 @@ Then, like for any other module, include it in your Kernel class::
 
     public function registerBundles()
     {
-        $modules = array(
+        $modules = [
             ...
 
             new Zikula\Bundle\GeneratorBundle\SensioGeneratorBundle(),
-        );
+        ];
 
         ...
     }

@@ -44,7 +44,7 @@ class Manipulator
         while ($token = array_shift($this->tokens)) {
             $this->line += substr_count($this->value($token), "\n");
 
-            if (is_array($token) && in_array($token[0], array(T_WHITESPACE, T_COMMENT, T_DOC_COMMENT))) {
+            if (is_array($token) && in_array($token[0], [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT])) {
                 continue;
             }
 
@@ -62,7 +62,7 @@ class Manipulator
         $i = 0;
         $tokens = $this->tokens;
         while ($token = array_shift($tokens)) {
-            if (is_array($token) && in_array($token[0], array(T_WHITESPACE, T_COMMENT, T_DOC_COMMENT))) {
+            if (is_array($token) && in_array($token[0], [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT])) {
                 continue;
             }
 

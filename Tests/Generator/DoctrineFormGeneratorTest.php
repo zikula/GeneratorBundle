@@ -25,8 +25,8 @@ class DoctrineFormGeneratorTest extends GeneratorTest
         $bundle->expects($this->any())->method('getNamespace')->will($this->returnValue('Foo\BarBundle'));
 
         $metadata = $this->getMockBuilder('Doctrine\ORM\Mapping\ClassMetadataInfo')->disableOriginalConstructor()->getMock();
-        $metadata->identifier = array('id');
-        $metadata->associationMappings = array('title' => array('type' => 'string'));
+        $metadata->identifier = ['id'];
+        $metadata->associationMappings = ['title' => ['type' => 'string']];
 
         $generator->generate($bundle, 'Post', $metadata);
 
