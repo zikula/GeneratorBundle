@@ -59,7 +59,8 @@ class BundleGenerator extends Generator
             'format'           => $format,
             'bundle_basename'  => $basename,
             'extension_alias'  => Container::underscore($basename),
-            'zikulaVersion'    => ZikulaKernel::VERSION
+            'zikulaVersion'    => ZikulaKernel::VERSION,
+            'php_min'          => ZikulaKernel::PHP_MINIMUM_VERSION
         ];
 
         $this->renderFile('bundle/.gitignore.twig', $dir.'/.gitignore', $parameters);
