@@ -1,0 +1,79 @@
+<?php
+
+namespace {{ namespace }}\Container;
+
+{% block use_statements %}
+use Symfony\Component\Routing\RouterInterface;
+use Zikula\Common\Translator\TranslatorInterface;
+use Zikula\Core\LinkContainer\LinkContainerInterface;
+use Zikula\PermissionsModule\Api\ApiInterface\PermissionApiInterface;
+{% endblock use_statements %}
+
+/**
+{% block phpdoc_class_header %}
+ * This is the class that manages your module links
+{% endblock phpdoc_class_header %}
+ */
+{% block class_definition %}
+class LinkContainer implements LinkContainerInterface
+{% endblock class_definition %}
+{
+{% block class_body %}
+    /**
+     * @var TranslatorInterface
+     */
+    private $translator;
+
+    /**
+     * @var RouterInterface
+     */
+    private $router;
+
+    /**
+     * @var PermissionApiInterface
+     */
+    private $permissionApi;
+
+    /**
+     * LinkContainer constructor.
+     * @param TranslatorInterface $translator
+     * @param RouterInterface $router
+     * @param PermissionApiInterface $permissionApi
+     */
+    public function __construct(
+        TranslatorInterface $translator,
+        RouterInterface $router,
+        PermissionApiInterface $permissionApi
+    ) {
+        $this->translator = $translator;
+        $this->router = $router;
+        $this->permissionApi = $permissionApi;
+    }
+
+    public function getLinks($type = LinkContainerInterface::TYPE_ADMIN)
+    {
+        $links = [];
+        $links[] = [
+            'url' => $this->router->generate('{{ bundle|lower }}_default_index'),
+            'text' => $this->translator->__('Front End View'),
+            'icon' => 'eye'
+        ];
+        if (LinkContainerInterface::TYPE_ADMIN == $type) {
+            if ($this->permissionApi->hasPermission('{{ bundle }}::', '::', ACCESS_ADMIN)) {
+                $links[] = [
+                    'url' => $this->router->generate('{{ bundle|lower }}_config_settings'),
+                    'text' => $this->translator->__('Modify Config'),
+                    'icon' => 'wrench'
+                ];
+            }
+        }
+
+        return $links;
+    }
+
+    public function getBundleName()
+    {
+        return '{{ bundle }}';
+    }
+{% endblock class_body %}
+}

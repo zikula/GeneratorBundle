@@ -1,0 +1,13 @@
+{% raw %}{{ adminHeader() }}{% endraw %}
+<div class="container-fluid">
+    <div class="row">
+        <h3>
+            <span class="fa fa-wrench"></span>
+            {% raw %}{{ __('Settings') }}
+            {{ pageSetVar('title', __('Settings')) }}{% endraw %}
+        </h3>
+
+        <!-- Config form goes here -->
+    </div>
+</div>
+{% raw %}{{ adminFooter() }}{% endraw %}

@@ -203,7 +203,7 @@ EOT
                 'The default (if left blank) and recommended format is annotation.',
                 '',
             ]);
-            $defaultFormat = (null !== $input->getOption('route-format') ? $input->getOption('route-format') : 'annotation');
+            $defaultFormat = (null !== $input->getOption('format') ? $input->getOption('format') : 'annotation');
             $format = $io->choice('Configuration format (yml, xml, php, or annotation)', ['yml', 'xml', 'php', 'annotation'], $defaultFormat);
             $input->setOption('format', $format);
         }

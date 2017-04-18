@@ -1,7 +1,7 @@
 {
     "name": "{{ vendor|lower }}/{{ bundle_name|lower }}-module",
     "version": "1.0.0",
-    "description": "{{ bundle }} description",
+    "description": "{{ bundle_name }} description",
     "type": "zikula-module",
     "license": "MIT",
     "authors": [
@@ -24,10 +24,11 @@
             "displayname": "{{ bundle_name }}",
             "url": "{{ bundle_name|lower|slice(0,-6) }}",
             "capabilities": {
-                "admin": {"route": "{{ bundle|lower }}_default_index"}
+                "user": {"route": "{{ bundle|lower }}_default_index"},
+                "admin": {"route": "{{ bundle|lower }}_config_settings"}
             },
             "securityschema": {
-                "{{ bundle_name }}::": "::"
+                "{{ bundle }}::": "::"
             }
         }
     }

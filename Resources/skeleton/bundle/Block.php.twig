@@ -1,0 +1,42 @@
+<?php
+
+namespace {{ namespace }}\Block;
+
+{% block use_statements %}
+use Zikula\BlocksModule\BlockHandlerInterface;
+{% endblock use_statements %}
+
+/**
+ * Example block to demonstrate a 'bare bones' block requiring only the interface.
+ */
+{% block class_definition %}
+class {{ bundle_name }}Block implements BlockHandlerInterface
+{% endblock class_definition %}
+{
+{% block class_body %}
+    public function getType()
+    {
+        return '{{ bundle_name }}';
+    }
+
+    public function display(array $properties)
+    {
+        return "<div><strong>{{ bundle_name }} Block!</strong></div>";
+    }
+
+    public function getFormClassName()
+    {
+        return null;
+    }
+
+    public function getFormTemplate()
+    {
+        return '';
+    }
+
+    public function getFormOptions()
+    {
+        return [];
+    }
+{% endblock class_body %}
+}
