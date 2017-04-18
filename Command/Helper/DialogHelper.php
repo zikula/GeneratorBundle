@@ -11,7 +11,7 @@
 
 namespace Zikula\Bundle\GeneratorBundle\Command\Helper;
 
-use Symfony\Component\Console\Helper\DialogHelper as BaseDialogHelper;
+use Symfony\Component\Console\Helper\QuestionHelper;
 use Symfony\Component\Console\Output\OutputInterface;
 
 /**
@@ -19,7 +19,7 @@ use Symfony\Component\Console\Output\OutputInterface;
  *
  * @author Fabien Potencier <fabien@symfony.com>
  */
-class DialogHelper extends BaseDialogHelper
+class DialogHelper extends QuestionHelper
 {
     public function writeGeneratorSummary(OutputInterface $output, $errors)
     {

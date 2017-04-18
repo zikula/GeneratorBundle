@@ -37,21 +37,13 @@ class GenerateDoctrineFormCommand extends GenerateDoctrineCommand
             ])
             ->setDescription('Generates a form type class based on a Doctrine entity')
             ->setHelp(<<<EOT
-The <info>doctrine:generate:form</info> command generates a form class based on a Doctrine entity.
+The <info>zikula:doctrine:generate:form</info> command generates a form class based on a Doctrine entity.
 
-<info>php app/console doctrine:generate:form AcmeBlogModule:Post</info>
-
-Every generated file is based on a template. There are default templates but they can be overriden by placing custom templates in one of the following locations, by order of priority:
-
-<info>BUNDLE_PATH/Resources/GeneratorBundle/skeleton/form
-APP_PATH/Resources/GeneratorBundle/skeleton/form</info>
-
-You can check https://github.com/zikula/GeneratorBundle/tree/master/Resources/skeleton
-in order to know the file structure of the skeleton
+<info>php app/console zikula:doctrine:generate:form AcmeBlogModule:Post</info>
 EOT
             )
-            ->setName('doctrine:generate:form')
-            ->setAliases(['generate:doctrine:form'])
+            ->setName('zikula:doctrine:generate:form')
+            ->setAliases(['zikula:generate:doctrine:form'])
         ;
     }
 
@@ -63,7 +55,7 @@ EOT
         $entity = Validators::validateEntityName($input->getArgument('entity'));
         list($bundle, $entity) = $this->parseShortcutNotation($entity);
 
-        $entityClass = $this->getContainer()->get('doctrine')->getEntityNamespace($bundle).'\\'.$entity;
+        $entityClass = $this->getContainer()->get('doctrine')->getAliasNamespace($bundle).'\\'.$entity;
         $metadata = $this->getEntityMetadata($entityClass);
         $bundle   = $this->getApplication()->getKernel()->getBundle($bundle);
 

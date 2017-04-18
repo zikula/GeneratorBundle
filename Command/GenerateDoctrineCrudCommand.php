@@ -14,11 +14,10 @@ namespace Zikula\Bundle\GeneratorBundle\Command;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Output\Output;
 use Symfony\Component\Console\Command\Command;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Zikula\Bundle\GeneratorBundle\Generator\DoctrineCrudGenerator;
 use Zikula\Bundle\GeneratorBundle\Generator\DoctrineFormGenerator;
-use Zikula\Bundle\GeneratorBundle\Command\Helper\DialogHelper;
 use Zikula\Bundle\GeneratorBundle\Manipulator\RoutingManipulator;
 
 /**
@@ -45,32 +44,19 @@ class GenerateDoctrineCrudCommand extends GenerateDoctrineCommand
             ])
             ->setDescription('Generates a CRUD based on a Doctrine entity')
             ->setHelp(<<<EOT
-The <info>doctrine:generate:crud</info> command generates a CRUD based on a Doctrine entity.
+The <info>zikula:doctrine:generate:crud</info> command generates a CRUD based on a Doctrine entity.
 
 The default command only generates the list and show actions.
 
-<info>php app/console doctrine:generate:crud --entity=AcmeBlogModule:Post --route-prefix=post_admin</info>
+<info>php app/console zikula:doctrine:generate:crud --entity=AcmeBlogModule:Post --route-prefix=post_admin</info>
 
 Using the --with-write option allows to generate the new, edit and delete actions.
 
-<info>php app/console doctrine:generate:crud --entity=AcmeBlogModule:Post --route-prefix=post_admin --with-write</info>
-
-Every generated file is based on a template. There are default templates but they can be overriden by placing custom templates in one of the following locations, by order of priority:
-
-<info>BUNDLE_PATH/Resources/GeneratorBundle/skeleton/crud
-APP_PATH/Resources/GeneratorBundle/skeleton/crud</info>
-
-And
-
-<info>__bundle_path__/Resources/GeneratorBundle/skeleton/form
-__project_root__/app/Resources/GeneratorBundle/skeleton/form</info>
-
-You can check https://github.com/zikula/GeneratorBundle/tree/master/Resources/skeleton
-in order to know the file structure of the skeleton
+<info>php app/console zikula:doctrine:generate:crud --entity=AcmeBlogModule:Post --route-prefix=post_admin --with-write</info>
 EOT
             )
-            ->setName('doctrine:generate:crud')
-            ->setAliases(['generate:doctrine:crud'])
+            ->setName('zikula:doctrine:generate:crud')
+            ->setAliases(['zikula:generate:doctrine:crud'])
         ;
     }
 
@@ -79,11 +65,11 @@ EOT
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $dialog = $this->getDialogHelper();
+        $io = new SymfonyStyle($input, $output);
 
         if ($input->isInteractive()) {
-            if (!$dialog->askConfirmation($output, $dialog->getQuestion('Do you confirm generation', 'yes', '?'), true)) {
-                $output->writeln('<error>Command aborted</error>');
+            if (!$io->confirm('Do you confirm generation?', true)) {
+                $io->error('Command aborted');
 
                 return 1;
             }
@@ -97,9 +83,9 @@ EOT
         $withWrite = $input->getOption('with-write');
         $forceOverwrite = $input->getOption('overwrite');
 
-        $dialog->writeSection($output, 'CRUD generation');
+        $io->block('CRUD generation', 'info');
 
-        $entityClass = $this->getContainer()->get('doctrine')->getEntityNamespace($bundle).'\\'.$entity;
+        $entityClass = $this->getContainer()->get('doctrine')->getAliasNamespace($bundle).'\\'.$entity;
         $metadata    = $this->getEntityMetadata($entityClass);
         $bundle      = $this->getContainer()->get('kernel')->getBundle($bundle);
 
@@ -109,7 +95,14 @@ EOT
         $output->writeln('Generating the CRUD code: <info>OK</info>');
 
         $errors = [];
-        $runner = $dialog->getRunner($output, $errors);
+        $runner = function ($err) use ($output, &$errors) {
+            if ($err) {
+                $output->writeln('<fg=red>FAILED</>');
+                $errors = array_merge($errors, $err);
+            } else {
+                $output->writeln('<info>OK</info>');
+            }
+        };
 
         // form
         if ($withWrite) {
@@ -119,16 +112,18 @@ EOT
 
         // routing
         if ('annotation' != $format) {
-            $runner($this->updateRouting($dialog, $input, $output, $bundle, $format, $entity, $prefix));
+            $runner($this->updateRouting($io, $input, $output, $bundle, $format, $entity, $prefix));
         }
 
-        $dialog->writeGeneratorSummary($output, $errors);
+        $io->block('You can now start using the generated code!', null, 'bg=blue;fg=white', '  ', true);
+
+        return 0;
     }
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $dialog = $this->getDialogHelper();
-        $dialog->writeSection($output, 'Welcome to the Doctrine2 CRUD generator');
+        $io = new SymfonyStyle($input, $output);
+        $io->block('Welcome to the Doctrine2 CRUD generator', null, 'bg=blue;fg=white', '  ', true);
 
         // namespace
         $output->writeln([
@@ -143,13 +138,21 @@ EOT
             '',
         ]);
 
-        $entity = $dialog->askAndValidate($output, $dialog->getQuestion('The Entity shortcut name', $input->getOption('entity')), ['Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateEntityName'], false, $input->getOption('entity'));
+        $entity = $io->ask('The Entity shortcut name', $input->getOption('entity'), ['Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateEntityName']);
         $input->setOption('entity', $entity);
         list($bundle, $entity) = $this->parseShortcutNotation($entity);
 
         // Entity exists?
-        $entityClass = $this->getContainer()->get('doctrine')->getEntityNamespace($bundle).'\\'.$entity;
-        $metadata = $this->getEntityMetadata($entityClass);
+        try {
+            $entityClass = $this->getContainer()->get('doctrine')->getAliasNamespace($bundle) . '\\' . $entity;
+            $metadata = $this->getEntityMetadata($entityClass);
+        } catch (\Doctrine\ORM\ORMException $e) {
+        }
+        if (isset($metadata)) {
+            $io->error('Entity already exists!');
+            exit;
+        }
+
 
         // write?
         $withWrite = $input->getOption('with-write') ?: false;
@@ -159,17 +162,17 @@ EOT
             'You can also ask it to generate "write" actions: new, update, and delete.',
             '',
         ]);
-        $withWrite = $dialog->askConfirmation($output, $dialog->getQuestion('Do you want to generate the "write" actions', $withWrite ? 'yes' : 'no', '?'), $withWrite);
+        $withWrite = $io->confirm('Do you want to generate the "write" actions', $withWrite ? true : false);
         $input->setOption('with-write', $withWrite);
 
         // format
-        $format = $input->getOption('format');
         $output->writeln([
             '',
             'Determine the format to use for the generated CRUD.',
             '',
         ]);
-        $format = $dialog->askAndValidate($output, $dialog->getQuestion('Configuration format (yml, xml, php, or annotation)', $format), ['Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateFormat'], false, $format);
+        $defaultFormat = (null !== $input->getOption('format') ? $input->getOption('format') : 'annotation');
+        $format = $io->choice('Configuration format (yml, xml, php, or annotation)', ['yml', 'xml', 'php', 'annotation'], $defaultFormat);
         $input->setOption('format', $format);
 
         // route prefix
@@ -180,7 +183,7 @@ EOT
             'prefix: /prefix/, /prefix/new, ...).',
             '',
         ]);
-        $prefix = $dialog->ask($output, $dialog->getQuestion('Routes prefix', '/'.$prefix), '/'.$prefix);
+        $prefix = $io->ask('Routes prefix', '/'.$prefix);
         $input->setOption('route-prefix', $prefix);
 
         // summary
@@ -206,11 +209,11 @@ EOT
         }
     }
 
-    protected function updateRouting($dialog, InputInterface $input, OutputInterface $output, $bundle, $format, $entity, $prefix)
+    protected function updateRouting(SymfonyStyle $io, InputInterface $input, OutputInterface $output, $bundle, $format, $entity, $prefix)
     {
         $auto = true;
         if ($input->isInteractive()) {
-            $auto = $dialog->askConfirmation($output, $dialog->getQuestion('Confirm automatic update of the Routing', 'yes', '?'), true);
+            $auto = $io->ask('Confirm automatic update of the Routing', true);
         }
 
         $output->write('Importing the CRUD routes: ');

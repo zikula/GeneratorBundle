@@ -2,7 +2,9 @@
 
 namespace {{ namespace }};
 
-class {{ bundle_name }}Installer extends \Zikula_AbstractInstaller
+use Zikula\Core\AbstractExtensionInstaller;
+
+class {{ bundle_name }}Installer extends AbstractExtensionInstaller
 {
     public function install()
     {

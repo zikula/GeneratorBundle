@@ -14,6 +14,7 @@ namespace Zikula\Bundle\GeneratorBundle\Command;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Zikula\Bundle\GeneratorBundle\Command\Helper\DialogHelper;
 use Zikula\Bundle\GeneratorBundle\Generator\ControllerGenerator;
 
@@ -45,13 +46,6 @@ class GenerateControllerCommand extends GeneratorCommand
                     'annotation'
                 ),
                 new InputOption(
-                    'template-format',
-                    '',
-                    InputOption::VALUE_REQUIRED,
-                    'The format that is used for templating (twig, php)',
-                    'twig'
-                ),
-                new InputOption(
                     'actions',
                     '',
                     InputOption::VALUE_REQUIRED | InputOption::VALUE_IS_ARRAY,
@@ -60,7 +54,7 @@ class GenerateControllerCommand extends GeneratorCommand
             ])
             ->setDescription('Generates a controller')
             ->setHelp(<<<EOT
-The <info>generate:controller</info> command helps you generates new controllers
+The <info>zikula:generate:controller</info> command helps you generates new controllers
 inside modules.
 
 By default, the command interacts with the developer to tweak the generation.
@@ -68,34 +62,25 @@ Any passed option will be used as a default value for the interaction
 (<comment>--module</comment> and <comment>--controller</comment> are the only
 ones needed if you follow the conventions):
 
-<info>php app/console generate:controller --controller=AcmeBlogModule:Post</info>
+<info>php app/console zikula:generate:controller --controller=AcmeBlogModule:Post</info>
 
 If you want to disable any user interaction, use <comment>--no-interaction</comment>
 but don't forget to pass all needed options:
 
-<info>php app/console generate:controller --controller=AcmeBlogModule:Post --no-interaction</info>
-
-Every generated file is based on a template. There are default templates but they can
-be overriden by placing custom templates in one of the following locations, by order of priority:
-
-<info>MODULE_PATH/Resources/GeneratorBundle/skeleton/controller
-APP_PATH/Resources/GeneratorBundle/skeleton/controller</info>
-
-You can check https://github.com/zikula/GeneratorBundle/tree/master/Resources/skeleton
-in order to know the file structure of the skeleton
+<info>php app/console zikula:generate:controller --controller=AcmeBlogModule:Post --no-interaction</info>
 EOT
             )
-            ->setName('generate:controller')
+            ->setName('zikula:generate:controller')
         ;
     }
 
     public function execute(InputInterface $input, OutputInterface $output)
     {
-        $dialog = $this->getDialogHelper();
+        $io = new SymfonyStyle($input, $output);
 
         if ($input->isInteractive()) {
-            if (!$dialog->askConfirmation($output, $dialog->getQuestion('Do you confirm generation', 'yes', '?'), true)) {
-                $output->writeln('<error>Command aborted</error>');
+            if (!$io->confirm('Do you confirm generation?', true)) {
+                $io->error('Command aborted');
 
                 return 1;
             }
@@ -116,20 +101,20 @@ EOT
             }
         }
 
-        $dialog->writeSection($output, 'Controller generation');
+        $io->block('Controller generation', 'info');
 
+        $io->success('Generating the bundle code!');
         $generator = $this->getGenerator($bundle);
-        $generator->generate($bundle, $controller, $input->getOption('route-format'), $input->getOption('template-format'), $this->parseActions($input->getOption('actions')));
+        $generator->generate($bundle, $controller, $input->getOption('route-format'), 'twig', $this->parseActions($input->getOption('actions')));
+        $io->success('Code generated!');
 
-        $output->writeln('Generating the bundle code: <info>OK</info>');
-
-        $dialog->writeGeneratorSummary($output, []);
+        $io->block('You can now start using the generated code!', null, 'bg=blue;fg=white', '  ', true);
     }
 
     public function interact(InputInterface $input, OutputInterface $output)
     {
-        $dialog = $this->getDialogHelper();
-        $dialog->writeSection($output, 'Welcome to the Zikula controller generator');
+        $io = new SymfonyStyle($input, $output);
+        $io->block('Welcome to the Zikula controller generator', null, 'bg=blue;fg=white', '  ', true);
 
         // namespace
         $output->writeln([
@@ -143,7 +128,7 @@ EOT
         ]);
 
         while (true) {
-            $controller = $dialog->askAndValidate($output, $dialog->getQuestion('Controller name', $input->getOption('controller')), ['Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateControllerName'], false, $input->getOption('controller'));
+            $controller = $io->ask('Controller name', $input->getOption('controller'), ['Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateControllerName']);
             list($bundle, $controller) = $this->parseShortcutNotation($controller);
 
             try {
@@ -153,56 +138,37 @@ EOT
                     break;
                 }
 
-                $output->writeln(sprintf('<bg=red>Controller "%s:%s" already exists.</>', $bundle, $controller));
+                $io->error(sprintf('Controller "%s:%s" already exists.', $bundle, $controller));
             } catch (\Exception $e) {
-                $output->writeln(sprintf('<bg=red>Bundle "%s" does not exists.</>', $bundle));
+                $io->error(sprintf('Bundle "%s" does not exists.', $bundle));
             }
         }
         $input->setOption('controller', $bundle.':'.$controller);
 
         // routing format
-        $defaultFormat = (null !== $input->getOption('route-format') ? $input->getOption('route-format') : 'annotation');
         $output->writeln([
             '',
             'Determine the format to use for the routing.',
             '',
         ]);
-        $routeFormat = $dialog->askAndValidate($output, $dialog->getQuestion('Routing format (php, xml, yml, annotation)', $defaultFormat), ['Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateFormat'], false, $defaultFormat);
+        $defaultFormat = (null !== $input->getOption('route-format') ? $input->getOption('route-format') : 'annotation');
+        $routeFormat = $io->choice('Routing format (yml, xml, php, or annotation)', ['yml', 'xml', 'php', 'annotation'], $defaultFormat);
         $input->setOption('route-format', $routeFormat);
 
-        // templating format
-        $validateTemplateFormat = function($format) {
-            if (!in_array($format, ['twig', 'php'])) {
-                throw new \InvalidArgumentException(sprintf('The template format must be twig or php, "%s" given', $format));
-            }
-
-            return $format;
-        };
-
-        $defaultFormat = (null !== $input->getOption('template-format') ? $input->getOption('template-format') : 'twig');
-        $output->writeln([
-            '',
-            'Determine the format to use for templating.',
-            '',
-        ]);
-        $templateFormat = $dialog->askAndValidate($output, $dialog->getQuestion('Template format (twig, php)', $defaultFormat), $validateTemplateFormat, false, $defaultFormat);
-        $input->setOption('template-format', $templateFormat);
-
         // actions
-        $input->setOption('actions', $this->addActions($input, $output, $dialog));
+        $input->setOption('actions', $this->addActions($input, $output, $io));
 
         // summary
-        $output->writeln([
-            '',
-            $this->getHelper('formatter')->formatBlock('Summary before generation', 'bg=blue;fg-white', true),
+        $io->block('Summary before generation', null, 'bg=blue;fg=white', '  ', true);
+        $io->writeln([
             '',
             sprintf('You are going to generate a "<info>%s:%s</info>" controller', $bundle, $controller),
-            sprintf('using the "<info>%s</info>" format for the routing and the "<info>%s</info>" format', $routeFormat, $templateFormat),
-            'for templating',
+            sprintf('using the "<info>%s</info>" format for the routing', $routeFormat),
+            ''
         ]);
     }
 
-    public function addActions(InputInterface $input, OutputInterface $output, DialogHelper $dialog)
+    public function addActions(InputInterface $input, OutputInterface $output, SymfonyStyle $io)
     {
         $output->writeln([
             '',
@@ -229,7 +195,7 @@ EOT
         while (true) {
             // name
             $output->writeln('');
-            $actionName = $dialog->askAndValidate($output, $dialog->getQuestion('New action name (press <return> to stop adding actions)', null), function ($name) use ($actions) {
+            $actionName = $io->ask('New action name (press <return> to stop adding actions)', null, function ($name) use ($actions) {
                 if (null == $name) {
                     return $name;
                 }
@@ -249,12 +215,12 @@ EOT
             }
 
             // route
-            $route = $dialog->ask($output, $dialog->getQuestion('Action route', '/'.substr($actionName, 0, -6)), '/'.substr($actionName, 0, -6));
+            $route = $io->ask('Action route', '/' . substr($actionName, 0, -6));
             $placeholders = $this->getPlaceholdersFromRoute($route);
 
             // template
-            $defaultTemplate = $input->getOption('controller').':'.substr($actionName, 0, -6).'.html.'.$input->getOption('template-format');
-            $template = $dialog->askAndValidate($output, $dialog->getQuestion('Templatename (optional)', $defaultTemplate), $templateNameValidator, false, 'default');
+            $defaultTemplate = $input->getOption('controller').':'.substr($actionName, 0, -6).'.html.twig';
+            $template = $io->ask('Templatename (optional)', $defaultTemplate, $templateNameValidator);
 
             // adding action
             $actions[$actionName] = [

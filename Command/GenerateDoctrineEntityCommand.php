@@ -11,8 +11,8 @@
 
 namespace Zikula\Bundle\GeneratorBundle\Command;
 
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Zikula\Bundle\GeneratorBundle\Generator\DoctrineEntityGenerator;
-use Zikula\Bundle\GeneratorBundle\Command\Helper\DialogHelper;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -29,18 +29,18 @@ class GenerateDoctrineEntityCommand extends GenerateDoctrineCommand
     protected function configure()
     {
         $this
-            ->setName('doctrine:generate:entity')
-            ->setAliases(['generate:doctrine:entity'])
+            ->setName('zikula:doctrine:generate:entity')
+            ->setAliases(['zikula:generate:doctrine:entity'])
             ->setDescription('Generates a new Doctrine entity inside a module')
             ->addOption('entity', null, InputOption::VALUE_REQUIRED, 'The entity class name to initialize (shortcut notation)')
             ->addOption('fields', null, InputOption::VALUE_REQUIRED, 'The fields to create with the new entity')
             ->addOption('format', null, InputOption::VALUE_REQUIRED, 'Use the format for configuration files (php, xml, yml, or annotation)', 'annotation')
             ->addOption('with-repository', null, InputOption::VALUE_NONE, 'Whether to generate the entity repository or not')
             ->setHelp(<<<EOT
-The <info>doctrine:generate:entity</info> task generates a new Doctrine
+The <info>zikula:doctrine:generate:entity</info> task generates a new Doctrine
 entity inside a module:
 
-<info>php app/console doctrine:generate:entity --entity=AcmeBlogModule:Blog/Post</info>
+<info>php app/console zikula:doctrine:generate:entity --entity=AcmeBlogModule:Blog/Post</info>
 
 The above command would initialize a new entity in the following entity
 namespace <info>Acme\BlogModule\Entity\Blog\Post</info>.
@@ -48,22 +48,22 @@ namespace <info>Acme\BlogModule\Entity\Blog\Post</info>.
 You can also optionally specify the fields you want to generate in the new
 entity:
 
-<info>php app/console doctrine:generate:entity --entity=AcmeBlogModule:Blog/Post --fields="title:string(255) body:text"</info>
+<info>php app/console zikula:doctrine:generate:entity --entity=AcmeBlogModule:Blog/Post --fields="title:string(255) body:text"</info>
 
 The command can also generate the corresponding entity repository class with the
 <comment>--with-repository</comment> option:
 
-<info>php app/console doctrine:generate:entity --entity=AcmeBlogModule:Blog/Post --with-repository</info>
+<info>php app/console zikula:doctrine:generate:entity --entity=AcmeBlogModule:Blog/Post --with-repository</info>
 
 By default, the command uses annotations for the mapping information; change it
 with <comment>--format</comment>:
 
-<info>php app/console doctrine:generate:entity --entity=AcmeBlogModule:Blog/Post --format=yml</info>
+<info>php app/console zikula:doctrine:generate:entity --entity=AcmeBlogModule:Blog/Post --format=yml</info>
 
 To deactivate the interaction mode, simply use the `--no-interaction` option
 without forgetting to pass all needed options:
 
-<info>php app/console doctrine:generate:entity --entity=AcmeBlogModule:Blog/Post --format=annotation --fields="title:string(255) body:text" --with-repository --no-interaction</info>
+<info>php app/console zikula:doctrine:generate:entity --entity=AcmeBlogModule:Blog/Post --format=annotation --fields="title:string(255) body:text" --with-repository --no-interaction</info>
 EOT
         );
     }
@@ -73,11 +73,11 @@ EOT
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
-        $dialog = $this->getDialogHelper();
+        $io = new SymfonyStyle($input, $output);
 
         if ($input->isInteractive()) {
-            if (!$dialog->askConfirmation($output, $dialog->getQuestion('Do you confirm generation', 'yes', '?'), true)) {
-                $output->writeln('<error>Command aborted</error>');
+            if (!$io->confirm('Do you confirm generation', true)) {
+                $io->error('Command aborted');
 
                 return 1;
             }
@@ -88,22 +88,22 @@ EOT
         $format = Validators::validateFormat($input->getOption('format'));
         $fields = $this->parseFields($input->getOption('fields'));
 
-        $dialog->writeSection($output, 'Entity generation');
+        $io->block('Entity generation', 'info');
 
         $bundle = $this->getContainer()->get('kernel')->getBundle($bundle);
 
+        $io->text('Generating the module code...');
         $generator = $this->getGenerator();
         $generator->generate($bundle, $entity, $format, array_values($fields), $input->getOption('with-repository'));
+        $io->success('Code generated!');
 
-        $output->writeln('Generating the entity code: <info>OK</info>');
-
-        $dialog->writeGeneratorSummary($output, []);
+        $io->block('You can now start using the generated code!', null, 'bg=blue;fg=white', '  ', true);
     }
 
     protected function interact(InputInterface $input, OutputInterface $output)
     {
-        $dialog = $this->getDialogHelper();
-        $dialog->writeSection($output, 'Welcome to the Doctrine2 entity generator');
+        $io = new SymfonyStyle($input, $output);
+        $io->block('Welcome to the Doctrine2 entity generator', null, 'bg=blue;fg=white', '  ', true);
 
         // namespace
         $output->writeln([
@@ -118,7 +118,7 @@ EOT
         $bundleNames = array_keys($this->getContainer()->get('kernel')->getBundles());
 
         while (true) {
-            $entity = $dialog->askAndValidate($output, $dialog->getQuestion('The Entity shortcut name', $input->getOption('entity')), ['Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateEntityName'], false, $input->getOption('entity'), $bundleNames);
+            $entity = $io->ask('The Entity shortcut name', $input->getOption('entity'), ['Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateEntityName']);
 
             list($bundle, $entity) = $this->parseShortcutNotation($entity);
 
@@ -149,17 +149,16 @@ EOT
             '',
         ]);
 
-        $formats = ['yml', 'xml', 'php', 'annotation'];
-
-        $format = $dialog->askAndValidate($output, $dialog->getQuestion('Configuration format (yml, xml, php, or annotation)', $input->getOption('format')), ['Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateFormat'], false, $input->getOption('format'), $formats);
+        $defaultFormat = (null !== $input->getOption('format') ? $input->getOption('format') : 'annotation');
+        $format = $io->choice('Configuration format (yml, xml, php, or annotation)', ['yml', 'xml', 'php', 'annotation'], $defaultFormat);
         $input->setOption('format', $format);
 
         // fields
-        $input->setOption('fields', $this->addFields($input, $output, $dialog));
+        $input->setOption('fields', $this->addFields($input, $output, $io));
 
         // repository?
         $output->writeln('');
-        $withRepository = $dialog->askConfirmation($output, $dialog->getQuestion('Do you want to generate an empty repository class', $input->getOption('with-repository') ? 'yes' : 'no', '?'), $input->getOption('with-repository'));
+        $withRepository = $io->confirm('Do you want to generate an empty repository class?', $input->getOption('with-repository') ? 'yes' : 'no');
         $input->setOption('with-repository', $withRepository);
 
         // summary
@@ -196,7 +195,7 @@ EOT
         return $fields;
     }
 
-    private function addFields(InputInterface $input, OutputInterface $output, DialogHelper $dialog)
+    private function addFields(InputInterface $input, OutputInterface $output, SymfonyStyle $io)
     {
         $fields = $this->parseFields($input->getOption('fields'));
         $output->writeln([
@@ -252,7 +251,7 @@ EOT
         while (true) {
             $output->writeln('');
             $generator = $this->getGenerator();
-            $columnName = $dialog->askAndValidate($output, $dialog->getQuestion('New field name (press <return> to stop adding fields)', null), function ($name) use ($fields, $generator) {
+            $columnName = $io->ask('New field name (press <return> to stop adding fields)', null, function ($name) use ($fields, $generator) {
                 if (isset($fields[$name]) || 'id' == $name) {
                     throw new \InvalidArgumentException(sprintf('Field "%s" is already defined.', $name));
                 }
@@ -281,12 +280,12 @@ EOT
                 $defaultType = 'boolean';
             }
 
-            $type = $dialog->askAndValidate($output, $dialog->getQuestion('Field type', $defaultType), $fieldValidator, false, $defaultType, $types);
+            $type = $io->ask('Field type', $defaultType, $fieldValidator);
 
             $data = ['columnName' => $columnName, 'fieldName' => lcfirst(Container::camelize($columnName)), 'type' => $type];
 
             if ($type == 'string') {
-                $data['length'] = $dialog->askAndValidate($output, $dialog->getQuestion('Field length', 255), $lengthValidator, false, 255);
+                $data['length'] = $io->ask('Field length', 255, $lengthValidator);
             }
 
             $fields[$columnName] = $data;
@@ -295,6 +294,9 @@ EOT
         return $fields;
     }
 
+    /**
+     * @return DoctrineEntityGenerator
+     */
     protected function createGenerator()
     {
         return new DoctrineEntityGenerator($this->getContainer()->get('filesystem'), $this->getContainer()->get('doctrine'));

@@ -5,8 +5,8 @@ namespace {{ namespace }}\Controller;
 {% block use_statements %}
 use Zikula\Core\Controller\AbstractController;
 {% if 'annotation' == format -%}
-use Zikula\Bundle\FrameworkExtraBundle\Configuration\Route;
-use Zikula\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
+use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
 {% endif %}
 {% endblock use_statements %}
 
@@ -24,7 +24,7 @@ class DefaultController extends AbstractController
     public function indexAction($name = 'no name')
     {
         {% if 'annotation' != format -%}
-        return $this->render('{{ bundle }}:Default:index.html.twig', ['name' => $name]);
+        return $this->render('@{{ bundle }}/Default/index.html.twig', ['name' => $name]);
         {%- else -%}
         return ['name' => $name];
         {%- endif %}

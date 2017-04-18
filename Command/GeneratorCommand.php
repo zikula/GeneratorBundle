@@ -13,6 +13,7 @@ namespace Zikula\Bundle\GeneratorBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Zikula\Bundle\GeneratorBundle\Command\Helper\DialogHelper;
+use Zikula\Bundle\GeneratorBundle\Generator\BundleGenerator;
 use Zikula\Bundle\GeneratorBundle\Generator\Generator;
 
 /**
@@ -23,7 +24,7 @@ use Zikula\Bundle\GeneratorBundle\Generator\Generator;
 abstract class GeneratorCommand extends ContainerAwareCommand
 {
     /**
-     * @var Generator
+     * @var BundleGenerator
      */
     private $generator;
 
@@ -65,10 +66,10 @@ abstract class GeneratorCommand extends ContainerAwareCommand
 
     protected function getDialogHelper()
     {
-        $dialog = $this->getHelperSet()->get('dialog');
-        if (!$dialog || get_class($dialog) !== 'Zikula\Bundle\GeneratorBundle\Command\Helper\DialogHelper') {
-            $this->getHelperSet()->set($dialog = new DialogHelper());
+        if ($this->getHelperSet()->has('dialog')) {
+            return $this->getHelperSet()->get('dialog');
         }
+        $this->getHelperSet()->set($dialog = new DialogHelper(), 'dialog');
 
         return $dialog;
     }
