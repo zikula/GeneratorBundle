@@ -53,11 +53,13 @@ class LinkContainer implements LinkContainerInterface
     public function getLinks($type = LinkContainerInterface::TYPE_ADMIN)
     {
         $links = [];
-        $links[] = [
-            'url' => $this->router->generate('{{ bundle|lower }}_default_index'),
-            'text' => $this->translator->__('Front End View'),
-            'icon' => 'eye'
-        ];
+        if (LinkContainerInterface::TYPE_USER == $type) {
+            $links[] = [
+                'url' => $this->router->generate('{{ bundle|lower }}_default_index'),
+                'text' => $this->translator->__('Front End View'),
+                'icon' => 'eye'
+            ];
+        }
         if (LinkContainerInterface::TYPE_ADMIN == $type) {
             if ($this->permissionApi->hasPermission('{{ bundle }}::', '::', ACCESS_ADMIN)) {
                 $links[] = [
