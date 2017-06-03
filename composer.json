@@ -15,9 +15,9 @@
         }
     ],
     "require": {
-        "symfony/framework-bundle": "3.2.*",
-        "symfony/finder": "3.2.*",
-        "symfony/console": "3.2.*"
+        "symfony/framework-bundle": "3.*",
+        "symfony/finder": "3.*",
+        "symfony/console": "3.*"
     },
     "require-dev": {
         "symfony/doctrine-bridge": "3.2.*",
