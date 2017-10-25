@@ -8,7 +8,7 @@
 {% if 'annotation' == format %}
      * @Route("/", name="{{ route_name_prefix }}")
      * @Method("GET")
-     * @Template()
+     * @Template("{{ bundle }}:{{ entity|replace({'\\': '/'}) }}:index.html.twig")
 {% endif %}
 {% endblock phpdoc_method_annotations %}
      */

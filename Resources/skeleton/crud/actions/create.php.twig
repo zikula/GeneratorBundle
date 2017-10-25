@@ -7,7 +7,7 @@
 {% if 'annotation' == format %}
      * @Route("/", name="{{ route_name_prefix }}_create")
      * @Method("POST")
-     * @Template("{{ bundle }}:{{ entity }}:new.html.twig")
+     * @Template("{{ bundle }}:{{ entity|replace({'\\': '/'}) }}:new.html.twig")
 {% endif %}
 {% endblock phpdoc_method_annotations %}
      */

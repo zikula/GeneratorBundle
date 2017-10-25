@@ -19,11 +19,7 @@ class {{ controller }}Controller extends Controller
     {% if 'annotation' == format.routing -%}
     /**
      * @Route("{{ action.route }}")
-     {% if 'default' == action.template -%}
-     * @Template()
-     {% else -%}
      * @Template("{{ action.template }}")
-     {% endif -%}
      */
     {% endif -%}
     public function {{ action.name }}(

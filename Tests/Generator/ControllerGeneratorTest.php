@@ -75,7 +75,6 @@ class ControllerGeneratorTest extends GeneratorTest
         $strings = [
             'public function showPageAction($id, $slug)',
             'public function getListOfPagesAction($max_count)',
-            '@Template()',
             '@Template("FooBarBundle:Page:pages_list.html.twig")'
         ];
         foreach ($strings as $string) {

@@ -19,7 +19,7 @@ class DefaultController extends AbstractController
     {% if 'annotation' == format -%}
     /**
      * @Route("/hello/{name}")
-     * @Template()
+     * @Template("{{ bundle }}:Default:index.html.twig")
      */
     {% endif -%}
     public function indexAction(Request $request, $name = 'no name')

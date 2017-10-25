@@ -26,7 +26,7 @@ class ConfigController extends AbstractController
     /**
      * @Route("/settings")
      * @Theme("admin")
-     * @Template()
+     * @Template("{{ bundle }}:Admin:config.html.twig")
      */
     {% endif -%}
     public function settingsAction(Request $request)
