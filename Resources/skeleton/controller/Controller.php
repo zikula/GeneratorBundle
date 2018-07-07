@@ -5,8 +5,8 @@ namespace {{ namespace }}\Controller;
 {% block use_statements %}
 use Symfony\Bundle\FrameworkBundle\Controller\Controller;
 {% if 'annotation' == format.routing -%}
-use Sensio\Bundle\FrameworkExtraBundle\Configuration\Route;
 use Sensio\Bundle\FrameworkExtraBundle\Configuration\Template;
+use Symfony\Component\Routing\Annotation\Route;
 {% endif %}
 {% endblock use_statements %}
 
