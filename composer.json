@@ -15,14 +15,14 @@
         }
     ],
     "require": {
-        "symfony/framework-bundle": "3.*",
-        "symfony/finder": "3.*",
-        "symfony/console": "3.*"
+        "symfony/framework-bundle": "4.*",
+        "symfony/finder": "4.*",
+        "symfony/console": "4.*"
     },
     "require-dev": {
-        "symfony/doctrine-bridge": "3.2.*",
-        "doctrine/orm": "2.5.*",
-        "twig/twig": "~1.28"
+        "symfony/doctrine-bridge": "4.*",
+        "doctrine/orm": "2.*",
+        "twig/twig": "2.*"
     },
     "autoload": {
         "psr-0": { "Zikula\\Bundle\\GeneratorBundle\\": "" }
