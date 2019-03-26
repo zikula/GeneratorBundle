@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -13,7 +15,6 @@ namespace Zikula\Bundle\GeneratorBundle\Command;
 
 use Symfony\Bundle\FrameworkBundle\Command\ContainerAwareCommand;
 use Zikula\Bundle\GeneratorBundle\Command\Helper\DialogHelper;
-use Zikula\Bundle\GeneratorBundle\Generator\BundleGenerator;
 use Zikula\Bundle\GeneratorBundle\Generator\Generator;
 
 /**
@@ -24,19 +25,19 @@ use Zikula\Bundle\GeneratorBundle\Generator\Generator;
 abstract class GeneratorCommand extends ContainerAwareCommand
 {
     /**
-     * @var BundleGenerator
+     * @var Generator
      */
     private $generator;
 
     // only useful for unit tests
-    public function setGenerator(Generator $generator)
+    public function setGenerator(Generator $generator): void
     {
         $this->generator = $generator;
     }
 
-    protected abstract function createGenerator();
+    abstract protected function createGenerator(): Generator;
 
-    protected function getGenerator($bundle = null)
+    protected function getGenerator(string $bundle = null): Generator
     {
         if (null === $this->generator) {
             $this->generator = $this->createGenerator();
@@ -46,7 +47,7 @@ abstract class GeneratorCommand extends ContainerAwareCommand
         return $this->generator;
     }
 
-    protected function getSkeletonDirs($bundle = null)
+    protected function getSkeletonDirs(string $bundle = null): array
     {
         $skeletonDirs = [];
 
@@ -64,7 +65,7 @@ abstract class GeneratorCommand extends ContainerAwareCommand
         return $skeletonDirs;
     }
 
-    protected function getDialogHelper()
+    protected function getDialogHelper(): DialogHelper
     {
         if ($this->getHelperSet()->has('dialog')) {
             return $this->getHelperSet()->get('dialog');

@@ -1,17 +1,19 @@
 <?php
 
-use Symfony\Component\HttpKernel\Kernel;
+declare(strict_types=1);
+
 use Symfony\Component\Config\Loader\LoaderInterface;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpKernel\Kernel;
+use Zikula\Bundle\GeneratorBundle\ZikulaGeneratorBundle;
 
 class AppKernel extends Kernel
 {
     public function registerBundles()
     {
-        $bundles = [
-            new Zikula\Bundle\GeneratorBundle\ZikulaGeneratorBundle(),
+        return [
+            new ZikulaGeneratorBundle()
         ];
-
-        return $bundles;
     }
 
     public function registerContainerConfiguration(LoaderInterface $loader)
@@ -22,6 +24,6 @@ class AppKernel extends Kernel
     {
         parent::boot();
 
-        $this->container->set('filesystem', new \Symfony\Component\Filesystem\Filesystem());
+        $this->container->set('filesystem', new Filesystem());
     }
 }

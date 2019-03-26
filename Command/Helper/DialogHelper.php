@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -21,21 +23,21 @@ use Symfony\Component\Console\Output\OutputInterface;
  */
 class DialogHelper extends QuestionHelper
 {
-    public function writeGeneratorSummary(OutputInterface $output, $errors)
+    public function writeGeneratorSummary(OutputInterface $output, $errors): void
     {
         if (!$errors) {
             $this->writeSection($output, 'You can now start using the generated code!');
         } else {
             $this->writeSection($output, [
                 'The command was not able to configure everything automatically.',
-                'You must do the following changes manually.',
+                'You must do the following changes manually.'
             ], 'error');
 
             $output->writeln($errors);
         }
     }
 
-    public function getRunner(OutputInterface $output, &$errors)
+    public function getRunner(OutputInterface $output, &$errors): callable
     {
         $runner = function ($err) use ($output, &$errors) {
             if ($err) {
@@ -49,12 +51,12 @@ class DialogHelper extends QuestionHelper
         return $runner;
     }
 
-    public function writeSection(OutputInterface $output, $text, $style = 'bg=blue;fg=white')
+    public function writeSection(OutputInterface $output, $text, $style = 'bg=blue;fg=white'): void
     {
         $output->writeln([
             '',
-            $this->getHelperSet()->get('formatter')->formatBlock($text, $style, true),
-            '',
+            null !== $this->getHelperSet() ? $this->getHelperSet()->get('formatter')->formatBlock($text, $style, true) : $text,
+            ''
         ]);
     }
 

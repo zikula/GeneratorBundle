@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -11,6 +13,9 @@
 
 namespace Zikula\Bundle\GeneratorBundle\Command;
 
+use InvalidArgumentException;
+use RuntimeException;
+
 /**
  * Validator functions.
  *
@@ -18,22 +23,22 @@ namespace Zikula\Bundle\GeneratorBundle\Command;
  */
 class Validators
 {
-    public static function validateBundleNamespace($namespace)
+    public static function validateBundleNamespace(string $namespace): string
     {
-        $namespace = strtr($namespace, '/', '\\');
+        $namespace = str_replace('/', '\\', $namespace);
         if (!preg_match('/^(?:[a-zA-Z_\x7f-\xff][a-zA-Z0-9_\x7f-\xff]*\\\?)+$/', $namespace)) {
-            throw new \InvalidArgumentException('The namespace contains invalid characters.');
+            throw new InvalidArgumentException('The namespace contains invalid characters.');
         }
 
         if (!preg_match('/Module$/', $namespace)) {
-            throw new \InvalidArgumentException('The namespace must end with Module.');
+            throw new InvalidArgumentException('The namespace must end with Module.');
         }
 
         // validate reserved keywords
         $reserved = self::getReservedWords();
         foreach (explode('\\', $namespace) as $word) {
-            if (in_array(strtolower($word), $reserved)) {
-                throw new \InvalidArgumentException(sprintf('The namespace cannot contain PHP reserved words ("%s").', $word));
+            if (in_array(strtolower($word), $reserved, true)) {
+                throw new InvalidArgumentException(sprintf('The namespace cannot contain PHP reserved words ("%s").', $word));
             }
         }
 
@@ -43,26 +48,26 @@ class Validators
             $msg[] = sprintf('The namespace must contain a vendor namespace (e.g. "VendorName\%s" instead of simply "%s").', $namespace, $namespace);
             $msg[] = 'If you\'ve specified a vendor namespace, did you forget to surround it with quotes (init:module "Acme\BlogModule")?';
 
-            throw new \InvalidArgumentException(implode("\n\n", $msg));
+            throw new InvalidArgumentException(implode("\n\n", $msg));
         }
 
         return $namespace;
     }
 
-    public static function validateBundleName($bundle)
+    public static function validateBundleName(string $bundle): string
     {
         if (!preg_match('/Module$/', $bundle)) {
-            throw new \InvalidArgumentException('The module name must end with Module.');
+            throw new InvalidArgumentException('The module name must end with Module.');
         }
 
         return $bundle;
     }
 
-    public static function validateControllerName($controller)
+    public static function validateControllerName(string $controller): string
     {
         try {
             self::validateEntityName($controller);
-        } catch (\InvalidArgumentException $e) {
+        } catch (InvalidArgumentException $exception) {
             throw new \InvalidArgumentException(
                 sprintf(
                     'The controller name must contain a : ("%s" given, expecting something like AcmeBlogModule:Post)',
@@ -74,33 +79,33 @@ class Validators
         return $controller;
     }
 
-    public static function validateTargetDir($dir, $bundle, $namespace)
+    public static function validateTargetDir(string $dir/*, string $bundle, string $namespace*/): string
     {
         // add trailing / if necessary
-        return '/' === substr($dir, -1, 1) ? $dir : $dir.'/';
+        return '/' === $dir[strlen($dir) - 1] ? $dir : $dir.'/';
     }
 
-    public static function validateFormat($format)
+    public static function validateFormat(string $format): string
     {
         $format = strtolower($format);
 
         if (!in_array($format, ['php', 'xml', 'yml', 'annotation'])) {
-            throw new \RuntimeException(sprintf('Format "%s" is not supported.', $format));
+            throw new RuntimeException(sprintf('Format "%s" is not supported.', $format));
         }
 
         return $format;
     }
 
-    public static function validateEntityName($entity)
+    public static function validateEntityName(string $entity): string
     {
-        if (false === $pos = strpos($entity, ':')) {
-            throw new \InvalidArgumentException(sprintf('The entity name must contain a ":" ("%s" given, expecting something like AcmeBlogModule:Post)', $entity));
+        if (false === strpos($entity, ':')) {
+            throw new InvalidArgumentException(sprintf('The entity name must contain a ":" ("%s" given, expecting something like AcmeBlogModule:Post)', $entity));
         }
 
         return $entity;
     }
 
-    public static function getReservedWords()
+    public static function getReservedWords(): array
     {
         return [
             'abstract',

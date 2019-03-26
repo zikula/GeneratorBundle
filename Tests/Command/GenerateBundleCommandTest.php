@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -12,14 +14,16 @@
 namespace Sensio\Bundle\GeneratorBundle\Tests\Command;
 
 use Symfony\Component\Console\Tester\CommandTester;
-use Sensio\Bundle\GeneratorBundle\Command\GenerateBundleCommand;
+use Zikula\Bundle\GeneratorBundle\Command\GenerateBundleCommand;
+use Zikula\Bundle\GeneratorBundle\Command\GeneratorCommand;
+use Zikula\Bundle\GeneratorBundle\Generator\BundleGenerator;
 
 class GenerateBundleCommandTest extends GenerateCommandTest
 {
     /**
      * @dataProvider getInteractiveCommandData
      */
-    public function testInteractiveCommand($options, $input, $expected)
+    public function testInteractiveCommand($options, $input, $expected): void
     {
         list($namespace, $bundle, $dir, $format, $structure) = $expected;
 
@@ -34,7 +38,7 @@ class GenerateBundleCommandTest extends GenerateCommandTest
         $tester->execute($options);
     }
 
-    public function getInteractiveCommandData()
+    public function getInteractiveCommandData(): array
     {
         $tmp = sys_get_temp_dir();
 
@@ -48,7 +52,7 @@ class GenerateBundleCommandTest extends GenerateCommandTest
     /**
      * @dataProvider getNonInteractiveCommandData
      */
-    public function testNonInteractiveCommand($options, $expected)
+    public function testNonInteractiveCommand($options, $expected): void
     {
         list($namespace, $bundle, $dir, $format, $structure) = $expected;
 
@@ -63,7 +67,7 @@ class GenerateBundleCommandTest extends GenerateCommandTest
         $tester->execute($options, ['interactive' => false]);
     }
 
-    public function getNonInteractiveCommandData()
+    public function getNonInteractiveCommandData(): array
     {
         $tmp = sys_get_temp_dir();
 
@@ -73,10 +77,10 @@ class GenerateBundleCommandTest extends GenerateCommandTest
         ];
     }
 
-    protected function getCommand($generator, $input)
+    protected function getCommand($generator, $input): GeneratorCommand
     {
         $command = $this
-            ->getMockBuilder('Sensio\Bundle\GeneratorBundle\Command\GenerateBundleCommand')
+            ->getMockBuilder(GenerateBundleCommand::class)
             ->setMethods(['checkAutoloader', 'updateKernel', 'updateRouting'])
             ->getMock()
         ;
@@ -88,11 +92,11 @@ class GenerateBundleCommandTest extends GenerateCommandTest
         return $command;
     }
 
-    protected function getGenerator()
+    protected function getGenerator(): BundleGenerator
     {
         // get a noop generator
         return $this
-            ->getMockBuilder('Sensio\Bundle\GeneratorBundle\Generator\BundleGenerator')
+            ->getMockBuilder(BundleGenerator::class)
             ->disableOriginalConstructor()
             ->setMethods(['generate'])
             ->getMock()

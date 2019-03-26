@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 namespace Zikula\Bundle\GeneratorBundle;
 
 use Symfony\Bundle\FrameworkBundle\Console\Application as BaseApplication;
@@ -12,6 +14,6 @@ class Application extends BaseApplication
         parent::__construct($kernel);
 
         $this->setName('Zikula');
-        $this->setVersion('0.0.1 - '.$kernel->getName().'/'.$kernel->getEnvironment().($kernel->isDebug() ? '/debug' : ''));
+        $this->setVersion('0.0.1 - ' . $kernel->getEnvironment().($kernel->isDebug() ? '/debug' : ''));
     }
 }

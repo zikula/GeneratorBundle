@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -11,15 +13,21 @@
 
 namespace Sensio\Bundle\GeneratorBundle\Tests\Command;
 
+use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Tester\CommandTester;
-use Sensio\Bundle\GeneratorBundle\Command\GenerateDoctrineCrudCommand;
+use Zikula\Bundle\GeneratorBundle\Command\GenerateDoctrineCrudCommand;
+use Zikula\Bundle\GeneratorBundle\Command\GeneratorCommand;
+use Zikula\Bundle\GeneratorBundle\Generator\DoctrineCrudGenerator;
+use Zikula\Bundle\GeneratorBundle\Generator\DoctrineFormGenerator;
+use Symfony\Bridge\Doctrine\RegistryInterface;
 
 class GenerateDoctrineCrudCommandTest extends GenerateCommandTest
 {
     /**
      * @dataProvider getInteractiveCommandData
      */
-    public function testInteractiveCommand($options, $input, $expected)
+    public function testInteractiveCommand($options, $input, $expected): void
     {
         list($entity, $format, $prefix, $withWrite) = $expected;
 
@@ -34,7 +42,7 @@ class GenerateDoctrineCrudCommandTest extends GenerateCommandTest
         $tester->execute($options);
     }
 
-    public function getInteractiveCommandData()
+    public function getInteractiveCommandData(): array
     {
         return [
             [[], "AcmeBlogBundle:Blog/Post\n", ['Blog\\Post', 'annotation', 'blog_post', false]],
@@ -48,7 +56,7 @@ class GenerateDoctrineCrudCommandTest extends GenerateCommandTest
     /**
      * @dataProvider getNonInteractiveCommandData
      */
-    public function testNonInteractiveCommand($options, $expected)
+    public function testNonInteractiveCommand($options, $expected): void
     {
         list($entity, $format, $prefix, $withWrite) = $expected;
 
@@ -63,7 +71,7 @@ class GenerateDoctrineCrudCommandTest extends GenerateCommandTest
         $tester->execute($options, ['interactive' => false]);
     }
 
-    public function getNonInteractiveCommandData()
+    public function getNonInteractiveCommandData(): array
     {
         return [
             [['--entity' => 'AcmeBlogBundle:Blog/Post'], ['Blog\\Post', 'annotation', 'blog_post', false]],
@@ -71,18 +79,17 @@ class GenerateDoctrineCrudCommandTest extends GenerateCommandTest
         ];
     }
 
-    protected function getCommand($generator, $input)
+    protected function getCommand($generator, $input): GeneratorCommand
     {
         $command = $this
-            ->getMockBuilder('Sensio\Bundle\GeneratorBundle\Command\GenerateDoctrineCrudCommand')
+            ->getMockBuilder(GenerateDoctrineCrudCommand::class)
             ->setMethods(['getEntityMetadata'])
             ->getMock()
         ;
 
         $command
-            ->expects($this->any())
             ->method('getEntityMetadata')
-            ->will($this->returnValue([$this->getDoctrineMetadata()]))
+            ->willReturn([$this->getDoctrineMetadata()])
         ;
 
         $command->setContainer($this->getContainer());
@@ -93,45 +100,44 @@ class GenerateDoctrineCrudCommandTest extends GenerateCommandTest
         return $command;
     }
 
-    protected function getDoctrineMetadata()
+    protected function getDoctrineMetadata(): ClassMetadataInfo
     {
         return $this
-            ->getMockBuilder('Doctrine\ORM\Mapping\ClassMetadataInfo')
+            ->getMockBuilder(ClassMetadataInfo::class)
             ->disableOriginalConstructor()
             ->getMock()
         ;
     }
 
-    protected function getGenerator()
+    protected function getGenerator(): Generator
     {
         // get a noop generator
         return $this
-            ->getMockBuilder('Sensio\Bundle\GeneratorBundle\Generator\DoctrineCrudGenerator')
+            ->getMockBuilder(DoctrineCrudGenerator::class)
             ->disableOriginalConstructor()
             ->setMethods(['generate'])
             ->getMock()
         ;
     }
 
-    protected function getFormGenerator()
+    protected function getFormGenerator(): Generator
     {
         return $this
-            ->getMockBuilder('Sensio\Bundle\GeneratorBundle\Generator\DoctrineFormGenerator')
+            ->getMockBuilder(DoctrineFormGenerator::class)
             ->disableOriginalConstructor()
             ->setMethods(['generate'])
             ->getMock()
         ;
     }
 
-    protected function getContainer()
+    protected function getContainer(): ContainerInterface
     {
         $container = parent::getContainer();
 
-        $registry = $this->getMock('Symfony\Bridge\Doctrine\RegistryInterface');
+        $registry = $this->getMock(RegistryInterface::class);
         $registry
-            ->expects($this->any())
             ->method('getEntityNamespace')
-            ->will($this->returnValue('Foo\\FooBundle\\Entity'))
+            ->willReturn('Foo\\FooBundle\\Entity')
         ;
 
         $container->set('doctrine', $registry);

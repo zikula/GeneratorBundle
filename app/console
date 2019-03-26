@@ -1,6 +1,8 @@
 #!/usr/bin/env php
 <?php
 
+declare(strict_types=1);
+
 use Zikula\Bundle\GeneratorBundle\Application;
 use Symfony\Component\Console\Input\ArgvInput;
 

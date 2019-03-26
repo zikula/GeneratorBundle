@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -11,9 +13,9 @@
 
 namespace Zikula\Bundle\GeneratorBundle\Generator;
 
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
+use RuntimeException;
+use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 
 /**
  * Generates a form class based on a Doctrine entity.
@@ -23,38 +25,23 @@ use Doctrine\ORM\Mapping\ClassMetadataInfo;
  */
 class DoctrineFormGenerator extends Generator
 {
-    private $filesystem;
     private $className;
     private $classPath;
 
-    /**
-     * Constructor.
-     *
-     * @param Filesystem $filesystem A Filesystem instance
-     */
-    public function __construct(Filesystem $filesystem)
-    {
-        $this->filesystem = $filesystem;
-    }
-
-    public function getClassName()
+    public function getClassName(): string
     {
         return $this->className;
     }
 
-    public function getClassPath()
+    public function getClassPath(): string
     {
         return $this->classPath;
     }
 
     /**
      * Generates the entity form class if it does not exist.
-     *
-     * @param BundleInterface   $bundle   The bundle in which to create the class
-     * @param string            $entity   The entity relative class name
-     * @param ClassMetadataInfo $metadata The entity metadata class
      */
-    public function generate(BundleInterface $bundle, $entity, ClassMetadataInfo $metadata)
+    public function generate(BundleInterface $bundle, string $entity, /*ClassMetadataInfo */$metadata): void
     {
         $parts       = explode('\\', $entity);
         $entityClass = array_pop($parts);
@@ -64,11 +51,11 @@ class DoctrineFormGenerator extends Generator
         $this->classPath = $dirPath.'/'.str_replace('\\', '/', $entity).'Type.php';
 
         if (file_exists($this->classPath)) {
-            throw new \RuntimeException(sprintf('Unable to generate the %s form class as it already exists under the %s file', $this->className, $this->classPath));
+            throw new RuntimeException(sprintf('Unable to generate the %s form class as it already exists under the %s file', $this->className, $this->classPath));
         }
 
         if (count($metadata->identifier) > 1) {
-            throw new \RuntimeException('The form generator does not support entity classes with multiple primary keys.');
+            throw new RuntimeException('The form generator does not support entity classes with multiple primary keys.');
         }
 
         $parts = explode('\\', $entity);
@@ -86,13 +73,9 @@ class DoctrineFormGenerator extends Generator
     }
 
     /**
-     * Returns an array of fields. Fields can be both column fields and
-     * association fields.
-     *
-     * @param  ClassMetadataInfo $metadata
-     * @return array             $fields
+     * Returns an array of fields. Fields can be both column fields and association fields.
      */
-    private function getFieldsFromMetadata(ClassMetadataInfo $metadata)
+    private function getFieldsFromMetadata(ClassMetadataInfo $metadata): array
     {
         $fields = (array) $metadata->fieldNames;
 
@@ -102,7 +85,7 @@ class DoctrineFormGenerator extends Generator
         }
 
         foreach ($metadata->associationMappings as $fieldName => $relation) {
-            if ($relation['type'] !== ClassMetadataInfo::ONE_TO_MANY) {
+            if (ClassMetadataInfo::ONE_TO_MANY !== $relation['type']) {
                 $fields[] = $fieldName;
             }
         }

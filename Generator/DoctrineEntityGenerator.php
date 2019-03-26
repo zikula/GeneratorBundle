@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -11,13 +13,14 @@
 
 namespace Zikula\Bundle\GeneratorBundle\Generator;
 
-use Symfony\Component\Filesystem\Filesystem;
-use Symfony\Component\HttpKernel\Bundle\BundleInterface;
-use Symfony\Bridge\Doctrine\RegistryInterface;
 use Doctrine\ORM\Mapping\ClassMetadataInfo;
 use Doctrine\ORM\Tools\EntityGenerator;
 use Doctrine\ORM\Tools\EntityRepositoryGenerator;
 use Doctrine\ORM\Tools\Export\ClassMetadataExporter;
+use RuntimeException;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpKernel\Bundle\BundleInterface;
+use Symfony\Bridge\Doctrine\RegistryInterface;
 
 /**
  * Generates a Doctrine entity class based on its name, fields and format.
@@ -27,19 +30,18 @@ use Doctrine\ORM\Tools\Export\ClassMetadataExporter;
  */
 class DoctrineEntityGenerator extends Generator
 {
-    private $filesystem;
     private $registry;
 
     public function __construct(Filesystem $filesystem, RegistryInterface $registry)
     {
-        $this->filesystem = $filesystem;
+        parent::__construct($filesystem);
         $this->registry = $registry;
     }
 
-    public function generate(BundleInterface $bundle, $entity, $format, array $fields, $withRepository)
+    public function generate(BundleInterface $bundle, string $entity, string $format, array $fields, bool $withRepository): void
     {
         // configure the bundle (needed if the bundle does not contain any Entities yet)
-        $config = $this->registry->getEntityManager(null)->getConfiguration();
+        $config = $this->registry->getEntityManager()->getConfiguration();
         $config->setEntityNamespaces(array_merge(
             [$bundle->getName() => $bundle->getNamespace().'\\Entity'],
             $config->getEntityNamespaces()
@@ -48,7 +50,7 @@ class DoctrineEntityGenerator extends Generator
         $entityClass = $this->registry->getEntityNamespace($bundle->getName()).'\\'.$entity;
         $entityPath = $bundle->getPath().'/Entity/'.str_replace('\\', '/', $entity).'.php';
         if (file_exists($entityPath)) {
-            throw new \RuntimeException(sprintf('Entity "%s" already exists.', $entityClass));
+            throw new RuntimeException(sprintf('Entity "%s" already exists.', $entityClass));
         }
 
         $class = new ClassMetadataInfo($entityClass);
@@ -68,7 +70,7 @@ class DoctrineEntityGenerator extends Generator
             $mappingPath = $mappingCode = false;
         } else {
             $cme = new ClassMetadataExporter();
-            $exporter = $cme->getExporter('yml' == $format ? 'yaml' : $format);
+            $exporter = $cme->getExporter('yml' === $format ? 'yaml' : $format);
             $mappingPath = $bundle->getPath().'/Resources/config/doctrine/'.str_replace('\\', '.', $entity).'.orm.'.$format;
 
             if (file_exists($mappingPath)) {
@@ -94,12 +96,12 @@ class DoctrineEntityGenerator extends Generator
         }
     }
 
-    public function isReservedKeyword($keyword)
+    public function isReservedKeyword(string $keyword): bool
     {
         return $this->registry->getConnection()->getDatabasePlatform()->getReservedKeywordsList()->isKeyword($keyword);
     }
 
-    protected function getEntityGenerator()
+    protected function getEntityGenerator(): EntityGenerator
     {
         $entityGenerator = new EntityGenerator();
         $entityGenerator->setGenerateAnnotations(false);
@@ -112,7 +114,7 @@ class DoctrineEntityGenerator extends Generator
         return $entityGenerator;
     }
 
-    protected function getRepositoryGenerator()
+    protected function getRepositoryGenerator(): EntityRepositoryGenerator
     {
         return new EntityRepositoryGenerator();
     }

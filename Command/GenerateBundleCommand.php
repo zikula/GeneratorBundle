@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -11,11 +13,15 @@
 
 namespace Zikula\Bundle\GeneratorBundle\Command;
 
+use Exception;
+use InvalidArgumentException;
+use RuntimeException;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Zikula\Bundle\GeneratorBundle\Generator\BundleGenerator;
+use Zikula\Bundle\GeneratorBundle\Generator\Generator;
 
 /**
  * Generates bundles.
@@ -64,24 +70,22 @@ EOT
     /**
      * @see Command
      *
-     * @throws \InvalidArgumentException When namespace doesn't end with Bundle
-     * @throws \RuntimeException         When bundle can't be executed
+     * @throws InvalidArgumentException When namespace doesn't end with Bundle
+     * @throws RuntimeException When bundle can't be executed
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
 
-        if ($input->isInteractive()) {
-            if (!$io->confirm('Do you confirm generation?', true)) {
-                $io->error('Command aborted');
+        if ($input->isInteractive() && !$io->confirm('Do you confirm generation?', true)) {
+            $io->error('Command aborted');
 
-                return 1;
-            }
+            return 1;
         }
 
         foreach (['namespace', 'dir'] as $option) {
             if (null === $input->getOption($option)) {
-                throw new \RuntimeException(sprintf('The "%s" option must be provided.', $option));
+                throw new RuntimeException(sprintf('The "%s" option must be provided.', $option));
             }
         }
 
@@ -121,7 +125,7 @@ EOT
         $namespace = null;
         try {
             $namespace = $input->getOption('namespace') ? Validators::validateBundleNamespace($input->getOption('namespace')) : null;
-        } catch (\Exception $error) {
+        } catch (Exception $error) {
             $io->writeln($this->getHelper('formatter')->formatBlock($error->getMessage(), 'error'));
         }
 
@@ -148,7 +152,7 @@ EOT
         $bundle = null;
         try {
             $bundle = $input->getOption('module-name') ? Validators::validateBundleName($input->getOption('module-name')) : null;
-        } catch (\Exception $error) {
+        } catch (Exception $error) {
             $io->writeln($this->getHelper('formatter')->formatBlock($error->getMessage(), 'error'));
         }
 
@@ -172,7 +176,7 @@ EOT
         $dir = null;
         try {
             $dir = $input->getOption('dir') ? Validators::validateTargetDir($input->getOption('dir'), $bundle, $namespace) : null;
-        } catch (\Exception $error) {
+        } catch (Exception $error) {
             $io->writeln($this->getHelper('formatter')->formatBlock($error->getMessage(), 'error'));
         }
 
@@ -192,7 +196,7 @@ EOT
         $format = null;
         try {
             $format = $input->getOption('format') ? Validators::validateFormat($input->getOption('format')) : null;
-        } catch (\Exception $error) {
+        } catch (Exception $error) {
             $io->writeln($this->getHelper('formatter')->formatBlock($error->getMessage(), 'error'));
         }
 
@@ -203,7 +207,7 @@ EOT
                 'The default (if left blank) and recommended format is annotation.',
                 '',
             ]);
-            $defaultFormat = (null !== $input->getOption('format') ? $input->getOption('format') : 'annotation');
+            $defaultFormat = ($input->getOption('format') ?? 'annotation');
             $format = $io->choice('Configuration format (yml, xml, php, or annotation)', ['yml', 'xml', 'php', 'annotation'], $defaultFormat);
             $input->setOption('format', $format);
         }
@@ -211,14 +215,13 @@ EOT
         // summary
         $io->block('Summary before generation', null, 'bg=blue;fg=white', '  ', true);
         $io->writeln([
-                '',
-                sprintf("You are going to generate a \"<info>%s\\%s</info>\" module\nin \"<info>%s</info>\" using the \"<info>%s</info>\" format.", $namespace, $bundle, $dir, $format),
-                ''
-            ]);
+            '',
+            sprintf("You are going to generate a \"<info>%s\\%s</info>\" module\nin \"<info>%s</info>\" using the \"<info>%s</info>\" format.", $namespace, $bundle, $dir, $format),
+            ''
+        ]);
     }
 
-
-    protected function createGenerator()
+    protected function createGenerator(): Generator
     {
         return new BundleGenerator($this->getContainer()->get('filesystem'));
     }

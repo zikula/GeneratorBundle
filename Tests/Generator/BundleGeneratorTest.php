@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -9,15 +11,15 @@
  * file that was distributed with this source code.
  */
 
-namespace Sensio\Bundle\GeneratorBundle\Tests\Generator;
+namespace Zikula\Bundle\GeneratorBundle\Tests\Generator;
 
-use Sensio\Bundle\GeneratorBundle\Generator\BundleGenerator;
+use Zikula\Bundle\GeneratorBundle\Generator\BundleGenerator;
 
 class BundleGeneratorTest extends GeneratorTest
 {
-    public function testGenerateYaml()
+    public function testGenerateYaml(): void
     {
-        $this->getGenerator()->generate('Foo\BarBundle', 'FooBarBundle', $this->tmpDir, 'yml', false);
+        $this->getGenerator()->generate('Foo\BarBundle', 'FooBarBundle', $this->tmpDir, 'yml');
 
         $files = [
             'FooBarBundle.php',
@@ -30,7 +32,7 @@ class BundleGeneratorTest extends GeneratorTest
             'DependencyInjection/FooBarExtension.php',
         ];
         foreach ($files as $file) {
-            $this->assertTrue(file_exists($this->tmpDir.'/Foo/BarBundle/'.$file), sprintf('%s has been generated', $file));
+            $this->assertFileExists($this->tmpDir . '/Foo/BarBundle/' . $file, sprintf('%s has been generated', $file));
         }
 
         $content = file_get_contents($this->tmpDir.'/Foo/BarBundle/FooBarBundle.php');
@@ -44,66 +46,66 @@ class BundleGeneratorTest extends GeneratorTest
         $this->assertContains('Hello {{ name }}!', $content);
     }
 
-    public function testGenerateAnnotation()
+    public function testGenerateAnnotation(): void
     {
-        $this->getGenerator()->generate('Foo\BarBundle', 'FooBarBundle', $this->tmpDir, 'annotation', false);
+        $this->getGenerator()->generate('Foo\BarBundle', 'FooBarBundle', $this->tmpDir, 'annotation');
 
-        $this->assertFalse(file_exists($this->tmpDir.'/Foo/BarBundle/Resources/config/routing.yml'));
-        $this->assertFalse(file_exists($this->tmpDir.'/Foo/BarBundle/Resources/config/routing.xml'));
+        $this->assertFileNotExists($this->tmpDir . '/Foo/BarBundle/Resources/config/routing.yml');
+        $this->assertFileNotExists($this->tmpDir . '/Foo/BarBundle/Resources/config/routing.xml');
 
         $content = file_get_contents($this->tmpDir.'/Foo/BarBundle/Controller/DefaultController.php');
         $this->assertContains('@Route("/hello/{name}"', $content);
     }
 
-    public function testDirIsFile()
+    public function testDirIsFile(): void
     {
         $this->filesystem->mkdir($this->tmpDir.'/Foo');
         $this->filesystem->touch($this->tmpDir.'/Foo/BarBundle');
 
         try {
-            $this->getGenerator()->generate('Foo\BarBundle', 'FooBarBundle', $this->tmpDir, 'yml', false);
+            $this->getGenerator()->generate('Foo\BarBundle', 'FooBarBundle', $this->tmpDir, 'yml');
             $this->fail('An exception was expected!');
-        } catch (\RuntimeException $e) {
-            $this->assertEquals(sprintf('Unable to generate the bundle as the target directory "%s" exists but is a file.', realpath($this->tmpDir.'/Foo/BarBundle')), $e->getMessage());
+        } catch (RuntimeException $exception) {
+            $this->assertEquals(sprintf('Unable to generate the bundle as the target directory "%s" exists but is a file.', realpath($this->tmpDir.'/Foo/BarBundle')), $exception->getMessage());
         }
     }
 
-    public function testIsNotWritableDir()
+    public function testIsNotWritableDir(): void
     {
         $this->filesystem->mkdir($this->tmpDir.'/Foo/BarBundle');
         $this->filesystem->chmod($this->tmpDir.'/Foo/BarBundle', 0444);
 
         try {
-            $this->getGenerator()->generate('Foo\BarBundle', 'FooBarBundle', $this->tmpDir, 'yml', false);
+            $this->getGenerator()->generate('Foo\BarBundle', 'FooBarBundle', $this->tmpDir, 'yml');
             $this->fail('An exception was expected!');
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $exception) {
             $this->filesystem->chmod($this->tmpDir.'/Foo/BarBundle', 0777);
-            $this->assertEquals(sprintf('Unable to generate the bundle as the target directory "%s" is not writable.', realpath($this->tmpDir.'/Foo/BarBundle')), $e->getMessage());
+            $this->assertEquals(sprintf('Unable to generate the bundle as the target directory "%s" is not writable.', realpath($this->tmpDir.'/Foo/BarBundle')), $exception->getMessage());
         }
     }
 
-    public function testIsNotEmptyDir()
+    public function testIsNotEmptyDir(): void
     {
         $this->filesystem->mkdir($this->tmpDir.'/Foo/BarBundle');
         $this->filesystem->touch($this->tmpDir.'/Foo/BarBundle/somefile');
 
         try {
-            $this->getGenerator()->generate('Foo\BarBundle', 'FooBarBundle', $this->tmpDir, 'yml', false);
+            $this->getGenerator()->generate('Foo\BarBundle', 'FooBarBundle', $this->tmpDir, 'yml');
             $this->fail('An exception was expected!');
-        } catch (\RuntimeException $e) {
+        } catch (RuntimeException $exception) {
             $this->filesystem->chmod($this->tmpDir.'/Foo/BarBundle', 0777);
-            $this->assertEquals(sprintf('Unable to generate the bundle as the target directory "%s" is not empty.', realpath($this->tmpDir.'/Foo/BarBundle')), $e->getMessage());
+            $this->assertEquals(sprintf('Unable to generate the bundle as the target directory "%s" is not empty.', realpath($this->tmpDir.'/Foo/BarBundle')), $exception->getMessage());
         }
     }
 
-    public function testExistingEmptyDirIsFine()
+    public function testExistingEmptyDirIsFine(): void
     {
         $this->filesystem->mkdir($this->tmpDir.'/Foo/BarBundle');
 
-        $this->getGenerator()->generate('Foo\BarBundle', 'FooBarBundle', $this->tmpDir, 'yml', false);
+        $this->getGenerator()->generate('Foo\BarBundle', 'FooBarBundle', $this->tmpDir, 'yml');
     }
 
-    protected function getGenerator()
+    protected function getGenerator(): BundleGenerator
     {
         $generator = new BundleGenerator($this->filesystem);
         $generator->setSkeletonDirs(__DIR__.'/../../Resources/skeleton');

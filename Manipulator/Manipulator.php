@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -19,16 +21,20 @@ namespace Zikula\Bundle\GeneratorBundle\Manipulator;
  */
 class Manipulator
 {
+    /**
+     * @var array
+     */
     protected $tokens;
+
+    /**
+     * @var int
+     */
     protected $line;
 
     /**
      * Sets the code to manipulate.
-     *
-     * @param array   $tokens An array of PHP tokens
-     * @param integer $line   The start line of the code
      */
-    protected function setCode(array $tokens, $line = 0)
+    protected function setCode(array $tokens, int $line = 0): void
     {
         $this->tokens = $tokens;
         $this->line = $line;
@@ -37,14 +43,14 @@ class Manipulator
     /**
      * Gets the next token.
      *
-     * @param mixed A PHP token
+     * @return mixed A PHP token
      */
     protected function next()
     {
         while ($token = array_shift($this->tokens)) {
             $this->line += substr_count($this->value($token), "\n");
 
-            if (is_array($token) && in_array($token[0], [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT])) {
+            if (is_array($token) && in_array($token[0], [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT], true)) {
                 continue;
             }
 
@@ -55,19 +61,19 @@ class Manipulator
     /**
      * Peeks the next token.
      *
-     * @param mixed A PHP token
+     * @return mixed A PHP token
      */
-    protected function peek($nb = 1)
+    protected function peek(int $nb = 1)
     {
         $i = 0;
         $tokens = $this->tokens;
         while ($token = array_shift($tokens)) {
-            if (is_array($token) && in_array($token[0], [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT])) {
+            if (is_array($token) && in_array($token[0], [T_WHITESPACE, T_COMMENT, T_DOC_COMMENT], true)) {
                 continue;
             }
 
             ++$i;
-            if ($i == $nb) {
+            if ($i === $nb) {
                 return $token;
             }
         }
@@ -76,9 +82,9 @@ class Manipulator
     /**
      * Gets the value of a token.
      *
-     * @param string The token value
+     * @param string|array $token
      */
-    protected function value($token)
+    protected function value($token): string
     {
         return is_array($token) ? $token[1] : $token;
     }

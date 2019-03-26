@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -14,9 +16,9 @@ namespace Zikula\Bundle\GeneratorBundle\Command;
 use Symfony\Component\Console\Input\InputArgument;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
-use Symfony\Component\Console\Output\Output;
 use Symfony\Component\Console\Command\Command;
 use Zikula\Bundle\GeneratorBundle\Generator\DoctrineFormGenerator;
+use Zikula\Bundle\GeneratorBundle\Generator\Generator;
 
 /**
  * Generates a form type class for a given Doctrine entity.
@@ -70,7 +72,7 @@ EOT
         ));
     }
 
-    protected function createGenerator()
+    protected function createGenerator(): Generator
     {
         return new DoctrineFormGenerator($this->getContainer()->get('filesystem'));
     }

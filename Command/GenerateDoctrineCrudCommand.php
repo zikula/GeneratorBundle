@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -11,6 +13,8 @@
 
 namespace Zikula\Bundle\GeneratorBundle\Command;
 
+use Doctrine\ORM\ORMException;
+use RuntimeException;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
@@ -18,6 +22,7 @@ use Symfony\Component\Console\Command\Command;
 use Symfony\Component\Console\Style\SymfonyStyle;
 use Zikula\Bundle\GeneratorBundle\Generator\DoctrineCrudGenerator;
 use Zikula\Bundle\GeneratorBundle\Generator\DoctrineFormGenerator;
+use Zikula\Bundle\GeneratorBundle\Generator\Generator;
 use Zikula\Bundle\GeneratorBundle\Manipulator\RoutingManipulator;
 
 /**
@@ -67,12 +72,10 @@ EOT
     {
         $io = new SymfonyStyle($input, $output);
 
-        if ($input->isInteractive()) {
-            if (!$io->confirm('Do you confirm generation?', true)) {
-                $io->error('Command aborted');
+        if ($input->isInteractive() && !$io->confirm('Do you confirm generation?', true)) {
+            $io->error('Command aborted');
 
-                return 1;
-            }
+            return 1;
         }
 
         $entity = Validators::validateEntityName($input->getOption('entity'));
@@ -111,7 +114,7 @@ EOT
         }
 
         // routing
-        if ('annotation' != $format) {
+        if ('annotation' !== $format) {
             $runner($this->updateRouting($io, $input, $output, $bundle, $format, $entity, $prefix));
         }
 
@@ -146,13 +149,12 @@ EOT
         try {
             $entityClass = $this->getContainer()->get('doctrine')->getAliasNamespace($bundle) . '\\' . $entity;
             $metadata = $this->getEntityMetadata($entityClass);
-        } catch (\Doctrine\ORM\ORMException $e) {
+        } catch (ORMException $exception) {
         }
         if (isset($metadata)) {
             $io->error('Entity already exists!');
             exit;
         }
-
 
         // write?
         $withWrite = $input->getOption('with-write') ?: false;
@@ -160,7 +162,7 @@ EOT
             '',
             'By default, the generator creates two actions: list and show.',
             'You can also ask it to generate "write" actions: new, update, and delete.',
-            '',
+            ''
         ]);
         $withWrite = $io->confirm('Do you want to generate the "write" actions', $withWrite ? true : false);
         $input->setOption('with-write', $withWrite);
@@ -171,7 +173,7 @@ EOT
             'Determine the format to use for the generated CRUD.',
             '',
         ]);
-        $defaultFormat = (null !== $input->getOption('format') ? $input->getOption('format') : 'annotation');
+        $defaultFormat = ($input->getOption('format') ?? 'annotation');
         $format = $io->choice('Configuration format (yml, xml, php, or annotation)', ['yml', 'xml', 'php', 'annotation'], $defaultFormat);
         $input->setOption('format', $format);
 
@@ -181,7 +183,7 @@ EOT
             '',
             'Determine the routes prefix (all the routes will be "mounted" under this',
             'prefix: /prefix/, /prefix/new, ...).',
-            '',
+            ''
         ]);
         $prefix = $io->ask('Routes prefix', '/'.$prefix);
         $input->setOption('route-prefix', $prefix);
@@ -191,25 +193,25 @@ EOT
             '',
             $this->getHelper('formatter')->formatBlock('Summary before generation', 'bg=blue;fg=white', true),
             '',
-            sprintf("You are going to generate a CRUD controller for \"<info>%s:%s</info>\"", $bundle, $entity),
-            sprintf("using the \"<info>%s</info>\" format.", $format),
-            '',
+            sprintf('You are going to generate a CRUD controller for "<info>%s:%s</info>"', $bundle, $entity),
+            sprintf('using the "<info>%s</info>" format.', $format),
+            ''
         ]);
     }
 
     /**
      * Tries to generate forms if they don't exist yet and if we need write operations on entities.
      */
-    protected function generateForm($bundle, $entity, $metadata)
+    protected function generateForm($bundle, $entity, $metadata): void
     {
         try {
             $this->getFormGenerator($bundle)->generate($bundle, $entity, $metadata[0]);
-        } catch (\RuntimeException $e ) {
+        } catch (RuntimeException $e ) {
             // form already exists
         }
     }
 
-    protected function updateRouting(SymfonyStyle $io, InputInterface $input, OutputInterface $output, $bundle, $format, $entity, $prefix)
+    protected function updateRouting(SymfonyStyle $io, InputInterface $input, OutputInterface $output, string $bundle, string $format, string $entity, string $prefix): ?array
     {
         $auto = true;
         if ($input->isInteractive()) {
@@ -240,23 +242,23 @@ EOT
         }
     }
 
-    protected function getRoutePrefix(InputInterface $input, $entity)
+    protected function getRoutePrefix(InputInterface $input, string $entity): string
     {
         $prefix = $input->getOption('route-prefix') ?: strtolower(str_replace(['\\', '/'], '_', $entity));
 
-        if ($prefix && '/' === $prefix[0]) {
+        if ($prefix && 0 === strpos($prefix, '/')) {
             $prefix = substr($prefix, 1);
         }
 
         return $prefix;
     }
 
-    protected function createGenerator($bundle = null)
+    protected function createGenerator($bundle = null): Generator
     {
         return new DoctrineCrudGenerator($this->getContainer()->get('filesystem'));
     }
 
-    protected function getFormGenerator($bundle = null)
+    protected function getFormGenerator($bundle = null): Generator
     {
         if (null === $this->formGenerator) {
             $this->formGenerator = new DoctrineFormGenerator($this->getContainer()->get('filesystem'));
@@ -266,7 +268,7 @@ EOT
         return $this->formGenerator;
     }
 
-    public function setFormGenerator(DoctrineFormGenerator $formGenerator)
+    public function setFormGenerator(DoctrineFormGenerator $formGenerator): void
     {
         $this->formGenerator = $formGenerator;
     }

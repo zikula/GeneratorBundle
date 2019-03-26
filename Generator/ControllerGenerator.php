@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -11,7 +13,8 @@
 
 namespace Zikula\Bundle\GeneratorBundle\Generator;
 
-use Symfony\Component\Filesystem\Filesystem;
+use DOMDocument;
+use RuntimeException;
 use Symfony\Component\HttpKernel\Bundle\BundleInterface;
 
 /**
@@ -21,24 +24,12 @@ use Symfony\Component\HttpKernel\Bundle\BundleInterface;
  */
 class ControllerGenerator extends Generator
 {
-    private $filesystem;
-
-    /**
-     * Constructor.
-     *
-     * @param Filesystem $filesystem A Filesystem instance
-     */
-    public function __construct(Filesystem $filesystem)
-    {
-        $this->filesystem = $filesystem;
-    }
-
-    public function generate(BundleInterface $bundle, $controller, $routeFormat, $templateFormat, array $actions = [])
+    public function generate(BundleInterface $bundle, string $controller, string $routeFormat, string $templateFormat, array $actions = []): void
     {
         $dir = $bundle->getPath();
         $controllerFile = $dir.'/Controller/'.$controller.'Controller.php';
         if (file_exists($controllerFile)) {
-            throw new \RuntimeException(sprintf('Controller "%s" already exists', $controller));
+            throw new RuntimeException(sprintf('Controller "%s" already exists', $controller));
         }
 
         $parameters = [
@@ -53,17 +44,17 @@ class ControllerGenerator extends Generator
 
         foreach ($actions as $i => $action) {
             // get the actioname without the sufix Action (for the template logical name)
-            $actions[$i]['basename'] = $basename = substr($action['name'], 0, -6);
+            $actions[$i]['basename'] = substr($action['name'], 0, -6);
             $params = $parameters;
             $params['action'] = $actions[$i];
 
             // create a template
             $template = $actions[$i]['template'];
-            if ('default' == $template) {
+            if ('default' === $template) {
                 $template = $bundle->getName().':'.$controller.':'.substr($action['name'], 0, -6).'.html.'.$templateFormat;
             }
 
-            if ('twig' == $templateFormat) {
+            if ('twig' === $templateFormat) {
                 $this->renderFile('controller/Template.html.twig', $dir.'/Resources/views/'.$this->parseTemplatePath($template), $params);
             } else {
                 $this->renderFile('controller/Template.html.php', $dir.'/Resources/views/'.$this->parseTemplatePath($template), $params);
@@ -78,36 +69,35 @@ class ControllerGenerator extends Generator
         $this->renderFile('controller/ControllerTest.php', $dir.'/Tests/Controller/'.$controller.'ControllerTest.php', $parameters);
     }
 
-    public function generateRouting(BundleInterface $bundle, $controller, array $action, $format)
+    public function generateRouting(BundleInterface $bundle, string $controller, array $action, string $format): void
     {
         // annotation is generated in the templates
-        if ('annotation' == $format) {
-            return true;
+        if ('annotation' === $format) {
+            return;
         }
 
+        $content = '';
         $file = $bundle->getPath().'/Resources/config/routing.'.$format;
         if (file_exists($file)) {
             $content = file_get_contents($file);
         } elseif (!is_dir($dir = $bundle->getPath().'/Resources/config')) {
-            mkdir($dir);
+            if (!mkdir($dir) && !is_dir($dir)) {
+                throw new \RuntimeException(sprintf('Directory "%s" was not created', $dir));
+            }
         }
 
         $controller = $bundle->getName().':'.$controller.':'.$action['basename'];
         $name = strtolower(preg_replace('/([A-Z])/', '_\\1', $action['basename']));
 
-        if ('yml' == $format) {
+        if ('yml' === $format) {
             // yaml
-            if (!isset($content)) {
-                $content = '';
-            }
-
             $content .= sprintf(
                 "\n%s:\n    pattern: %s\n    defaults: { _controller: %s }\n",
                 $name,
                 $action['route'],
                 $controller
             );
-        } elseif ('xml' == $format) {
+        } elseif ('xml' === $format) {
             // xml
             if (!isset($content)) {
                 // new file
@@ -129,17 +119,17 @@ EOT;
             $default = $route->addChild('default', $controller);
             $default->addAttribute('key', '_controller');
 
-            $dom = new \DOMDocument('1.0');
+            $dom = new DOMDocument('1.0');
             $dom->preserveWhiteSpace = false;
             $dom->formatOutput = true;
             $dom->loadXML($sxe->asXML());
             $content = $dom->saveXML();
-        } elseif ('php' == $format) {
+        } elseif ('php' === $format) {
             // php
             if (isset($content)) {
                 // edit current file
                 $pointer = strpos($content, 'return');
-                if (!preg_match('/(\$[^ ]*).*?new RouteCollection\(\)/', $content, $collection) || false === $pointer) {
+                if (false === $pointer || !preg_match('/(\$[^ ]*).*?new RouteCollection\(\)/', $content, $collection)) {
                     throw new \RunTimeException('Routing.php file is not correct, please initialize RouteCollection.');
                 }
 
@@ -162,28 +152,28 @@ EOT;
             }
         }
 
-        $flink = fopen($file, 'w');
+        $flink = fopen($file, 'wb');
         if ($flink) {
             $write = fwrite($flink, $content);
 
             if ($write) {
                 fclose($flink);
             } else {
-                throw new \RunTimeException(sprintf('We cannot write into file "%s", has that file the correct access level?', $file));
+                throw new RuntimeException(sprintf('We cannot write into file "%s", has that file the correct access level?', $file));
             }
         } else {
-            throw new \RunTimeException(sprintf('Problems with generating file "%s", did you gave write access to that directory?', $file));
+            throw new RuntimeException(sprintf('Problems with generating file "%s", did you gave write access to that directory?', $file));
         }
     }
 
-    protected function parseTemplatePath($template)
+    protected function parseTemplatePath(string $template): string
     {
         $data = $this->parseLogicalTemplateName($template);
 
         return $data['controller'].'/'.$data['template'];
     }
 
-    protected function parseLogicalTemplateName($logicalname, $part = '')
+    protected function parseLogicalTemplateName(string $logicalname, string $part = ''): array
     {
         $data = [];
 

@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -11,13 +13,16 @@
 
 namespace Zikula\Bundle\GeneratorBundle\Command;
 
-use Symfony\Component\Console\Style\SymfonyStyle;
-use Zikula\Bundle\GeneratorBundle\Generator\DoctrineEntityGenerator;
+use Doctrine\DBAL\Types\Type;
+use Exception;
+use InvalidArgumentException;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
+use Symfony\Component\Console\Style\SymfonyStyle;
 use Symfony\Component\DependencyInjection\Container;
-use Doctrine\DBAL\Types\Type;
+use Zikula\Bundle\GeneratorBundle\Generator\DoctrineEntityGenerator;
+use Zikula\Bundle\GeneratorBundle\Generator\Generator;
 
 /**
  * Initializes a Doctrine entity inside a bundle.
@@ -69,18 +74,16 @@ EOT
     }
 
     /**
-     * @throws \InvalidArgumentException When the module doesn't end with Module (Example: "Module/MySampleModule")
+     * @throws InvalidArgumentException When the module doesn't end with Module (Example: "Module/MySampleModule")
      */
     protected function execute(InputInterface $input, OutputInterface $output)
     {
         $io = new SymfonyStyle($input, $output);
 
-        if ($input->isInteractive()) {
-            if (!$io->confirm('Do you confirm generation', true)) {
-                $io->error('Command aborted');
+        if ($input->isInteractive() && !$io->confirm('Do you confirm generation', true)) {
+            $io->error('Command aborted');
 
-                return 1;
-            }
+            return 1;
         }
 
         $entity = Validators::validateEntityName($input->getOption('entity'));
@@ -115,8 +118,8 @@ EOT
             ''
         ]);
 
-        $bundleNames = array_keys($this->getContainer()->get('kernel')->getBundles());
-
+        //$bundleNames = array_keys($this->getContainer()->get('kernel')->getBundles());
+        $bundle = $entity = '';
         while (true) {
             $entity = $io->ask('The Entity shortcut name', $input->getOption('entity'), ['Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateEntityName']);
 
@@ -136,7 +139,7 @@ EOT
                 }
 
                 $output->writeln(sprintf('<bg=red>Entity "%s:%s" already exists</>.', $bundle, $entity));
-            } catch (\Exception $e) {
+            } catch (Exception $exception) {
                 $output->writeln(sprintf('<bg=red>Bundle "%s" does not exist.</>', $bundle));
             }
         }
@@ -149,7 +152,7 @@ EOT
             '',
         ]);
 
-        $defaultFormat = (null !== $input->getOption('format') ? $input->getOption('format') : 'annotation');
+        $defaultFormat = ($input->getOption('format') ?? 'annotation');
         $format = $io->choice('Configuration format (yml, xml, php, or annotation)', ['yml', 'xml', 'php', 'annotation'], $defaultFormat);
         $input->setOption('format', $format);
 
@@ -166,13 +169,13 @@ EOT
             '',
             $this->getHelper('formatter')->formatBlock('Summary before generation', 'bg=blue;fg=white', true),
             '',
-            sprintf("You are going to generate a \"<info>%s:%s</info>\" Doctrine2 entity", $bundle, $entity),
-            sprintf("using the \"<info>%s</info>\" format.", $format),
+            sprintf('You are going to generate a "<info>%s:%s</info>" Doctrine2 entity', $bundle, $entity),
+            sprintf('using the "<info>%s</info>" format.', $format),
             '',
         ]);
     }
 
-    private function parseFields($input)
+    private function parseFields($input): array
     {
         if (is_array($input)) {
             return $input;
@@ -182,11 +185,11 @@ EOT
         foreach (explode(' ', $input) as $value) {
             $elements = explode(':', $value);
             $name = $elements[0];
-            if (strlen($name)) {
-                $type = isset($elements[1]) ? $elements[1] : 'string';
+            if ('' !== $name) {
+                $type = $elements[1] ?? 'string';
                 preg_match_all('/(.*)\((.*)\)/', $type, $matches);
-                $type = isset($matches[1][0]) ? $matches[1][0] : $type;
-                $length = isset($matches[2][0]) ? $matches[2][0] : null;
+                $type = $matches[1][0] ?? $type;
+                $length = $matches[2][0] ?? null;
 
                 $fields[$name] = ['fieldName' => $name, 'type' => $type, 'length' => $length];
             }
@@ -195,7 +198,7 @@ EOT
         return $fields;
     }
 
-    private function addFields(InputInterface $input, OutputInterface $output, SymfonyStyle $io)
+    private function addFields(InputInterface $input, OutputInterface $output, SymfonyStyle $io): array
     {
         $fields = $this->parseFields($input->getOption('fields'));
         $output->writeln([
@@ -215,7 +218,7 @@ EOT
             }
             $count += strlen($type);
             $output->write(sprintf('<comment>%s</comment>', $type));
-            if (count($types) != $i + 1) {
+            if (count($types) !== $i + 1) {
                 $output->write(', ');
             } else {
                 $output->write('.');
@@ -225,8 +228,8 @@ EOT
 
         $fieldValidator = function ($type) use ($types) {
             // FIXME: take into account user-defined field types
-            if (!in_array($type, $types)) {
-                throw new \InvalidArgumentException(sprintf('Invalid type "%s".', $type));
+            if (!in_array($type, $types, true)) {
+                throw new InvalidArgumentException(sprintf('Invalid type "%s".', $type));
             }
 
             return $type;
@@ -242,7 +245,7 @@ EOT
             ]);
 
             if (false === $result) {
-                throw new \InvalidArgumentException(sprintf('Invalid length "%s".', $length));
+                throw new InvalidArgumentException(sprintf('Invalid length "%s".', $length));
             }
 
             return $length;
@@ -252,13 +255,13 @@ EOT
             $output->writeln('');
             $generator = $this->getGenerator();
             $columnName = $io->ask('New field name (press <return> to stop adding fields)', null, function ($name) use ($fields, $generator) {
-                if (isset($fields[$name]) || 'id' == $name) {
-                    throw new \InvalidArgumentException(sprintf('Field "%s" is already defined.', $name));
+                if ('id' === $name || isset($fields[$name])) {
+                    throw new InvalidArgumentException(sprintf('Field "%s" is already defined.', $name));
                 }
 
                 // check reserved words
                 if ($generator->isReservedKeyword($name)){
-                    throw new \InvalidArgumentException(sprintf('Name "%s" is a reserved word.', $name));
+                    throw new InvalidArgumentException(sprintf('Name "%s" is a reserved word.', $name));
                 }
 
                 return $name;
@@ -270,13 +273,13 @@ EOT
             $defaultType = 'string';
 
             // try to guess the type by the column name prefix/suffix
-            if (substr($columnName, -3) == '_at') {
+            if ('_at' === substr($columnName, -3)) {
                 $defaultType = 'datetime';
-            } elseif (substr($columnName, -3) == '_id') {
+            } elseif ('_id' === substr($columnName, -3)) {
                 $defaultType = 'integer';
-            } elseif (substr($columnName, 0, 3) == 'is_') {
+            } elseif (0 === strpos($columnName, 'is_')) {
                 $defaultType = 'boolean';
-            } elseif (substr($columnName, 0, 4) == 'has_') {
+            } elseif (0 === strpos($columnName, 'has_')) {
                 $defaultType = 'boolean';
             }
 
@@ -284,7 +287,7 @@ EOT
 
             $data = ['columnName' => $columnName, 'fieldName' => lcfirst(Container::camelize($columnName)), 'type' => $type];
 
-            if ($type == 'string') {
+            if ('string' === $type) {
                 $data['length'] = $io->ask('Field length', 255, $lengthValidator);
             }
 
@@ -294,10 +297,7 @@ EOT
         return $fields;
     }
 
-    /**
-     * @return DoctrineEntityGenerator
-     */
-    protected function createGenerator()
+    protected function createGenerator(): Generator
     {
         return new DoctrineEntityGenerator($this->getContainer()->get('filesystem'), $this->getContainer()->get('doctrine'));
     }

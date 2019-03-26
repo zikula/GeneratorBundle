@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -11,12 +13,15 @@
 
 namespace Zikula\Bundle\GeneratorBundle\Command;
 
+use Exception;
+use InvalidArgumentException;
+use RuntimeException;
 use Symfony\Component\Console\Input\InputOption;
 use Symfony\Component\Console\Input\InputInterface;
 use Symfony\Component\Console\Output\OutputInterface;
 use Symfony\Component\Console\Style\SymfonyStyle;
-use Zikula\Bundle\GeneratorBundle\Command\Helper\DialogHelper;
 use Zikula\Bundle\GeneratorBundle\Generator\ControllerGenerator;
+use Zikula\Bundle\GeneratorBundle\Generator\Generator;
 
 /**
  * Generates controllers.
@@ -78,16 +83,14 @@ EOT
     {
         $io = new SymfonyStyle($input, $output);
 
-        if ($input->isInteractive()) {
-            if (!$io->confirm('Do you confirm generation?', true)) {
-                $io->error('Command aborted');
+        if ($input->isInteractive() && !$io->confirm('Do you confirm generation?', true)) {
+            $io->error('Command aborted');
 
-                return 1;
-            }
+            return 1;
         }
 
         if (null === $input->getOption('controller')) {
-            throw new \RuntimeException('The controller option must be provided.');
+            throw new RuntimeException('The controller option must be provided.');
         }
 
         list($bundle, $controller) = $this->parseShortcutNotation($input->getOption('controller'));
@@ -96,7 +99,7 @@ EOT
 
             try {
                 $bundle = $this->getContainer()->get('kernel')->getBundle($bundle);
-            } catch (\Exception $e) {
+            } catch (Exception $exception) {
                 $output->writeln(sprintf('<bg=red>Bundle "%s" does not exists.</>', $bundle));
             }
         }
@@ -127,6 +130,7 @@ EOT
             '',
         ]);
 
+        $bundle = $controller = '';
         while (true) {
             $controller = $io->ask('Controller name', $input->getOption('controller'), ['Zikula\Bundle\GeneratorBundle\Command\Validators', 'validateControllerName']);
             list($bundle, $controller) = $this->parseShortcutNotation($controller);
@@ -139,7 +143,7 @@ EOT
                 }
 
                 $io->error(sprintf('Controller "%s:%s" already exists.', $bundle, $controller));
-            } catch (\Exception $e) {
+            } catch (Exception $exception) {
                 $io->error(sprintf('Bundle "%s" does not exists.', $bundle));
             }
         }
@@ -151,7 +155,7 @@ EOT
             'Determine the format to use for the routing.',
             '',
         ]);
-        $defaultFormat = (null !== $input->getOption('route-format') ? $input->getOption('route-format') : 'annotation');
+        $defaultFormat = ($input->getOption('route-format') ?? 'annotation');
         $routeFormat = $io->choice('Routing format (yml, xml, php, or annotation)', ['yml', 'xml', 'php', 'annotation'], $defaultFormat);
         $input->setOption('route-format', $routeFormat);
 
@@ -168,7 +172,7 @@ EOT
         ]);
     }
 
-    public function addActions(InputInterface $input, OutputInterface $output, SymfonyStyle $io)
+    public function addActions(InputInterface $input, OutputInterface $output, SymfonyStyle $io): array
     {
         $output->writeln([
             '',
@@ -179,12 +183,12 @@ EOT
         ]);
 
         $templateNameValidator = function($name) {
-            if ('default' == $name) {
+            if ('default' === $name) {
                 return $name;
             }
 
-            if (2 != substr_count($name, ':')) {
-                throw new \InvalidArgumentException(sprintf('Template name "%s" does not have 2 colons', $name));
+            if (2 !== substr_count($name, ':')) {
+                throw new InvalidArgumentException(sprintf('Template name "%s" does not have 2 colons', $name));
             }
 
             return $name;
@@ -196,16 +200,16 @@ EOT
             // name
             $output->writeln('');
             $actionName = $io->ask('New action name (press <return> to stop adding actions)', null, function ($name) use ($actions) {
-                if (null == $name) {
+                if (null === $name) {
                     return $name;
                 }
 
                 if (isset($actions[$name])) {
-                    throw new \InvalidArgumentException(sprintf('Action "%s" is already defined', $name));
+                    throw new InvalidArgumentException(sprintf('Action "%s" is already defined', $name));
                 }
 
-                if ('Action' != substr($name, -6)) {
-                    throw new \InvalidArgumentException(sprintf('Name "%s" is not suffixed by Action', $name));
+                if ('Action' !== substr($name, -6)) {
+                    throw new InvalidArgumentException(sprintf('Name "%s" is not suffixed by Action', $name));
                 }
 
                 return $name;
@@ -234,7 +238,7 @@ EOT
         return $actions;
     }
 
-    public function parseActions($actions)
+    public function parseActions($actions): array
     {
         if (is_array($actions)) {
             return $actions;
@@ -247,12 +251,12 @@ EOT
 
             // name
             if (!isset($data[0])) {
-                throw new \InvalidArgumentException('An action must have a name');
+                throw new InvalidArgumentException('An action must have a name');
             }
             $name = array_shift($data);
 
             // route
-            $route = (isset($data[0]) && '' != $data[0]) ? array_shift($data) : '/'.substr($name, 0, -6);
+            $route = (isset($data[0]) && '' !== $data[0]) ? array_shift($data) : '/' . substr($name, 0, -6);
             if ($route) {
                 $placeholders = $this->getPlaceholdersFromRoute($route);
             } else {
@@ -260,7 +264,7 @@ EOT
             }
 
             // template
-            $template = (0 < count($data) && '' != $data[0]) ? implode(':', $data) : 'default';
+            $template = (0 < count($data) && '' !== $data[0]) ? implode(':', $data) : 'default';
 
             $newActions[$name] = [
                 'name'         => $name,
@@ -281,18 +285,18 @@ EOT
         return $placeholders;
     }
 
-    public function parseShortcutNotation($shortcut)
+    public function parseShortcutNotation($shortcut): array
     {
         $entity = str_replace('/', '\\', $shortcut);
 
         if (false === $pos = strpos($entity, ':')) {
-            throw new \InvalidArgumentException(sprintf('The controller name must contain a : ("%s" given, expecting something like AcmeBlogModule:Post)', $entity));
+            throw new InvalidArgumentException(sprintf('The controller name must contain a : ("%s" given, expecting something like AcmeBlogModule:Post)', $entity));
         }
 
         return [substr($entity, 0, $pos), substr($entity, $pos + 1)];
     }
 
-    protected function createGenerator()
+    protected function createGenerator(): Generator
     {
         return new ControllerGenerator($this->getContainer()->get('filesystem'));
     }

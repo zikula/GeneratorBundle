@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -11,6 +13,7 @@
 
 namespace Zikula\Bundle\GeneratorBundle\Manipulator;
 
+use RuntimeException;
 use Symfony\Component\DependencyInjection\Container;
 
 /**
@@ -20,14 +23,12 @@ use Symfony\Component\DependencyInjection\Container;
  */
 class RoutingManipulator extends Manipulator
 {
+    /**
+     * @var string
+     */
     private $file;
 
-    /**
-     * Constructor.
-     *
-     * @param string $file The YAML routing file path
-     */
-    public function __construct($file)
+    public function __construct(string $file)
     {
         $this->file = $file;
     }
@@ -35,16 +36,9 @@ class RoutingManipulator extends Manipulator
     /**
      * Adds a routing resource at the top of the existing ones.
      *
-     * @param string $bundle
-     * @param string $format
-     * @param string $prefix
-     * @param string $path
-     *
-     * @return Boolean true if it worked, false otherwise
-     *
-     * @throws \RuntimeException If bundle is already imported
+     * @throws RuntimeException If bundle is already imported
      */
-    public function addResource($bundle, $format, $prefix = '/', $path = 'routing')
+    public function addResource(string $bundle, string $format, string $prefix = '/', string $path = 'routing'): bool
     {
         $current = '';
         if (file_exists($this->file)) {
@@ -52,14 +46,16 @@ class RoutingManipulator extends Manipulator
 
             // Don't add same bundle twice
             if (false !== strpos($current, $bundle)) {
-                throw new \RuntimeException(sprintf('Module "%s" is already imported.', $bundle));
+                throw new RuntimeException(sprintf('Module "%s" is already imported.', $bundle));
             }
         } elseif (!is_dir($dir = dirname($this->file))) {
-            mkdir($dir, 0777, true);
+            if (!mkdir($dir, 0777, true) && !is_dir($dir)) {
+                throw new \RuntimeException(sprintf('Directory "%s" was not created', $dir));
+            }
         }
 
         $code = sprintf("%s:\n", Container::underscore(substr($bundle, 0, -6)).('/' !== $prefix ? '_'.str_replace('/', '_', substr($prefix, 1)) : ''));
-        if ('annotation' == $format) {
+        if ('annotation' === $format) {
             $code .= sprintf("    resource: \"@%s/Controller/\"\n    type:     annotation\n", $bundle);
         } else {
             $code .= sprintf("    resource: \"@%s/Resources/config/%s.%s\"\n", $bundle, $path, $format);
@@ -68,10 +64,6 @@ class RoutingManipulator extends Manipulator
         $code .= "\n";
         $code .= $current;
 
-        if (false === file_put_contents($this->file, $code)) {
-            return false;
-        }
-
-        return true;
+        return false !== file_put_contents($this->file, $code);
     }
 }

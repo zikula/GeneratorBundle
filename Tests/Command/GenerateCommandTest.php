@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -11,14 +13,19 @@
 
 namespace Sensio\Bundle\GeneratorBundle\Tests\Command;
 
+use PHPUnit\Framework\TestCase;
+use Psr\Container\ContainerInterface;
 use Symfony\Component\Console\Helper\HelperSet;
 use Symfony\Component\Console\Helper\FormatterHelper;
-use Sensio\Bundle\GeneratorBundle\Command\Helper\DialogHelper;
 use Symfony\Component\DependencyInjection\Container;
+use Symfony\Component\Filesystem\Filesystem;
+use Symfony\Component\HttpKernel\Bundle\BundleInterface;
+use Zikula\Bundle\GeneratorBundle\Command\Helper\DialogHelper;
+use Symfony\Component\HttpKernel\KernelInterface;
 
-abstract class GenerateCommandTest extends \PHPUnit_Framework_TestCase
+abstract class GenerateCommandTest extends TestCase
 {
-    protected function getHelperSet($input)
+    protected function getHelperSet($input): HelperSet
     {
         $dialog = new DialogHelper();
         $dialog->setInputStream($this->getInputStream($input));
@@ -26,13 +33,12 @@ abstract class GenerateCommandTest extends \PHPUnit_Framework_TestCase
         return new HelperSet([new FormatterHelper(), $dialog]);
     }
 
-    protected function getBundle()
+    protected function getBundle(): BundleInterface
     {
-        $bundle = $this->getMock('Symfony\Component\HttpKernel\Bundle\BundleInterface');
+        $bundle = $this->getMock(BundleInterface::class);
         $bundle
-            ->expects($this->any())
             ->method('getPath')
-            ->will($this->returnValue(sys_get_temp_dir()))
+            ->willReturn(sys_get_temp_dir())
         ;
 
         return $bundle;
@@ -40,32 +46,29 @@ abstract class GenerateCommandTest extends \PHPUnit_Framework_TestCase
 
     protected function getInputStream($input)
     {
-        $stream = fopen('php://memory', 'r+', false);
-        fputs($stream, $input.str_repeat("\n", 10));
+        $stream = fopen('php://memory', 'rb+', false);
+        fwrite($stream, $input.str_repeat("\n", 10));
         rewind($stream);
 
         return $stream;
     }
 
-    protected function getContainer()
+    protected function getContainer(): ContainerInterface
     {
-        $kernel = $this->getMock('Symfony\Component\HttpKernel\KernelInterface');
+        $kernel = $this->getMock(KernelInterface::class);
         $kernel
-            ->expects($this->any())
             ->method('getBundle')
-            ->will($this->returnValue($this->getBundle()))
+            ->willReturn($this->getBundle())
         ;
         $kernel
-            ->expects($this->any())
             ->method('getBundles')
-            ->will($this->returnValue([$this->getBundle()]))
+            ->willReturn([$this->getBundle()])
         ;
 
-        $filesystem = $this->getMock('Symfony\Component\Filesystem\Filesystem');
+        $filesystem = $this->getMock(Filesystem::class);
         $filesystem
-            ->expects($this->any())
             ->method('isAbsolutePath')
-            ->will($this->returnValue(true))
+            ->willReturn(true)
         ;
 
         $container = new Container();

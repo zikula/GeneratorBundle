@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -13,7 +15,11 @@ namespace Sensio\Bundle\GeneratorBundle\Tests\Command;
 
 use Symfony\Component\Console\Application;
 use Symfony\Component\Console\Tester\CommandTester;
-use Sensio\Bundle\GeneratorBundle\Command\GenerateControllerCommand;
+use Symfony\Component\HttpKernel\Bundle\BundleInterface;
+use Zikula\Bundle\GeneratorBundle\Command\GenerateControllerCommand;
+use Zikula\Bundle\GeneratorBundle\Command\GeneratorCommand;
+use Zikula\Bundle\GeneratorBundle\Generator\ControllerGenerator;
+use Zikula\Bundle\GeneratorBundle\Generator\Generator;
 
 class GenerateControllerCommandTest extends GenerateCommandTest
 {
@@ -24,7 +30,7 @@ class GenerateControllerCommandTest extends GenerateCommandTest
     /**
      * @dataProvider getInteractiveCommandData
      */
-    public function testInteractiveCommand($options, $input, $expected)
+    public function testInteractiveCommand($options, $input, $expected): void
     {
         list($controller, $routeFormat, $templateFormat, $actions) = $expected;
 
@@ -39,9 +45,9 @@ class GenerateControllerCommandTest extends GenerateCommandTest
         $tester->execute($options);
     }
 
-    public function getInteractiveCommandData()
+    public function getInteractiveCommandData(): array
     {
-        $tmp = sys_get_temp_dir();
+        //$tmp = sys_get_temp_dir();
 
         return [
             [[], "AcmeBlogBundle:Post\n", ['Post', 'annotation', 'twig', []]],
@@ -78,7 +84,7 @@ class GenerateControllerCommandTest extends GenerateCommandTest
     /**
      * @dataProvider getNonInteractiveCommandData
      */
-    public function testNonInteractiveCommand($options, $expected)
+    public function testNonInteractiveCommand($options, $expected): void
     {
         list($controller, $routeFormat, $templateFormat, $actions) = $expected;
 
@@ -93,9 +99,9 @@ class GenerateControllerCommandTest extends GenerateCommandTest
         $tester->execute($options, ['interactive' => false]);
     }
 
-    public function getNonInteractiveCommandData()
+    public function getNonInteractiveCommandData(): array
     {
-        $tmp = sys_get_temp_dir();
+        //$tmp = sys_get_temp_dir();
 
         return [
             [['--controller' => 'AcmeBlogBundle:Post'], ['Post', 'annotation', 'twig', []]],
@@ -131,10 +137,10 @@ class GenerateControllerCommandTest extends GenerateCommandTest
         ];
     }
 
-    protected function getCommand($generator, $input)
+    protected function getCommand($generator, $input): GeneratorCommand
     {
         $command = $this
-            ->getMockBuilder('Sensio\Bundle\GeneratorBundle\Command\GenerateControllerCommand')
+            ->getMockBuilder(GenerateControllerCommand::class)
             ->setMethods(['generateRouting'])
             ->getMock()
         ;
@@ -146,12 +152,12 @@ class GenerateControllerCommandTest extends GenerateCommandTest
         return $command;
     }
 
-    protected function getCommandTester($generator, $input = '')
+    protected function getCommandTester($generator, $input = ''): CommandTester
     {
         return new CommandTester($this->getCommand($generator, $input));
     }
 
-    protected function getApplication($input = '')
+    protected function getApplication($input = ''): Application
     {
         $application = new Application();
 
@@ -165,41 +171,41 @@ class GenerateControllerCommandTest extends GenerateCommandTest
         return $application;
     }
 
-    protected function getGenerator()
+    protected function getGenerator(): Generator
     {
-        if (null == $this->generator) {
+        if (null === $this->generator) {
             $this->setGenerator();
         }
 
         return $this->generator;
     }
 
-    protected function setGenerator()
+    protected function setGenerator(): void
     {
         // get a noop generator
         $this->generator = $this
-            ->getMockBuilder('Sensio\Bundle\GeneratorBundle\Generator\ControllerGenerator')
+            ->getMockBuilder(ControllerGenerator::class)
             ->disableOriginalConstructor()
             ->setMethods(['generate'])
             ->getMock()
         ;
     }
 
-    protected function getBundle()
+    protected function getBundle(): BundleInterface
     {
-        if (null == $this->bundle) {
+        if (null === $this->bundle) {
             $this->setBundle();
         }
 
         return $this->bundle;
     }
 
-    protected function setBundle()
+    protected function setBundle(): void
     {
-        $bundle = $this->getMock('Symfony\Component\HttpKernel\Bundle\BundleInterface');
-        $bundle->expects($this->any())->method('getPath')->will($this->returnValue($this->tmpDir));
-        $bundle->expects($this->any())->method('getName')->will($this->returnValue('FooBarBundle'));
-        $bundle->expects($this->any())->method('getNamespace')->will($this->returnValue('Foo\BarBundle'));
+        $bundle = $this->getMock(BundleInterface::class);
+        $bundle->method('getPath')->willReturn($this->tmpDir);
+        $bundle->method('getName')->willReturn('FooBarBundle');
+        $bundle->method('getNamespace')->willReturn('Foo\BarBundle');
 
         $this->bundle = $bundle;
     }

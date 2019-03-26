@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -9,28 +11,30 @@
  * file that was distributed with this source code.
  */
 
-namespace Sensio\Bundle\GeneratorBundle\Tests\Generator;
+namespace Zikula\Bundle\GeneratorBundle\Tests\Generator;
 
-use Sensio\Bundle\GeneratorBundle\Generator\DoctrineFormGenerator;
+use Zikula\Bundle\GeneratorBundle\Generator\DoctrineFormGenerator;
+use Symfony\Component\HttpKernel\Bundle\BundleInterface;
+use Doctrine\ORM\Mapping\ClassMetadataInfo;
 
 class DoctrineFormGeneratorTest extends GeneratorTest
 {
-    public function testGenerate()
+    public function testGenerate(): void
     {
         $generator = new DoctrineFormGenerator($this->filesystem);
         $generator->setSkeletonDirs(__DIR__.'/../../Resources/skeleton');
 
-        $bundle = $this->getMock('Symfony\Component\HttpKernel\Bundle\BundleInterface');
-        $bundle->expects($this->any())->method('getPath')->will($this->returnValue($this->tmpDir));
-        $bundle->expects($this->any())->method('getNamespace')->will($this->returnValue('Foo\BarBundle'));
+        $bundle = $this->getMock(BundleInterface::class);
+        $bundle->method('getPath')->willReturn($this->tmpDir);
+        $bundle->method('getNamespace')->willReturn('Foo\BarBundle');
 
-        $metadata = $this->getMockBuilder('Doctrine\ORM\Mapping\ClassMetadataInfo')->disableOriginalConstructor()->getMock();
+        $metadata = $this->getMockBuilder(ClassMetadataInfo::class)->disableOriginalConstructor()->getMock();
         $metadata->identifier = ['id'];
         $metadata->associationMappings = ['title' => ['type' => 'string']];
 
         $generator->generate($bundle, 'Post', $metadata);
 
-        $this->assertTrue(file_exists($this->tmpDir.'/Form/PostType.php'));
+        $this->assertFileExists($this->tmpDir . '/Form/PostType.php');
 
         $content = file_get_contents($this->tmpDir.'/Form/PostType.php');
         $this->assertContains('->add(\'title\')', $content);

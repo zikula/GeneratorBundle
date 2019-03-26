@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -9,13 +11,14 @@
  * file that was distributed with this source code.
  */
 
-namespace Sensio\Bundle\GeneratorBundle\Tests\Generator;
+namespace Zikula\Bundle\GeneratorBundle\Tests\Generator;
 
-use Sensio\Bundle\GeneratorBundle\Generator\ControllerGenerator;
+use Symfony\Component\HttpKernel\Bundle\BundleInterface;
+use Zikula\Bundle\GeneratorBundle\Generator\ControllerGenerator;
 
 class ControllerGeneratorTest extends GeneratorTest
 {
-    public function testGenerateController()
+    public function testGenerateController(): void
     {
         $this->getGenerator()->generate($this->getBundle(), 'Welcome', 'annotation', 'twig');
 
@@ -24,7 +27,7 @@ class ControllerGeneratorTest extends GeneratorTest
             'Tests/Controller/WelcomeControllerTest.php',
         ];
         foreach ($files as $file) {
-            $this->assertTrue(file_exists($this->tmpDir.'/'.$file), sprintf('%s has been generated', $file));
+            $this->assertFileExists($this->tmpDir . '/' . $file, sprintf('%s has been generated', $file));
         }
 
         $content = file_get_contents($this->tmpDir.'/Controller/WelcomeController.php');
@@ -36,14 +39,14 @@ class ControllerGeneratorTest extends GeneratorTest
             $this->assertContains($string, $content);
         }
 
-        $content = file_get_contents($this->tmpDir.'/Tests/Controller/WelcomeControllerTest.php');
+        /*$content = file_get_contents($this->tmpDir.'/Tests/Controller/WelcomeControllerTest.php');
         $strings = [
             'namespace Foo\\BarBundle\\Tests\\Controller',
             'class WelcomeControllerTest',
-        ];
+        ];*/
     }
 
-    public function testGenerateActions()
+    public function testGenerateActions(): void
     {
         $generator = $this->getGenerator();
         $actions = [
@@ -68,7 +71,7 @@ class ControllerGeneratorTest extends GeneratorTest
             'Resources/views/Page/pages_list.html.twig',
         ];
         foreach ($files as $file) {
-            $this->assertTrue(file_exists($this->tmpDir.'/'.$file), sprintf('%s has been generated', $file));
+            $this->assertFileExists($this->tmpDir . '/' . $file, sprintf('%s has been generated', $file));
         }
 
         $content = file_get_contents($this->tmpDir.'/Controller/PageController.php');
@@ -82,7 +85,7 @@ class ControllerGeneratorTest extends GeneratorTest
         }
     }
 
-    public function testGenerateActionsWithNonDefaultFormats()
+    public function testGenerateActionsWithNonDefaultFormats(): void
     {
         $generator = $this->getGenerator();
 
@@ -100,7 +103,7 @@ class ControllerGeneratorTest extends GeneratorTest
             'Resources/config/routing.yml'
         ];
         foreach ($files as $file) {
-            $this->assertTrue(file_exists($this->tmpDir.'/'.$file), $file.' has been generated');
+            $this->assertFileExists($this->tmpDir . '/' . $file, $file . ' has been generated');
         }
 
         $content = file_get_contents($this->tmpDir.'/Controller/PageController.php');
@@ -113,7 +116,7 @@ class ControllerGeneratorTest extends GeneratorTest
         $this->assertContains("show_page:\n    pattern: /{slug}\n    defaults: { _controller: FooBarBundle:Page:showPage }", $content);
     }
 
-    protected function getGenerator()
+    protected function getGenerator(): ControllerGenerator
     {
         $generator = new ControllerGenerator($this->filesystem);
         $generator->setSkeletonDirs(__DIR__.'/../../Resources/skeleton');
@@ -121,12 +124,12 @@ class ControllerGeneratorTest extends GeneratorTest
         return $generator;
     }
 
-    protected function getBundle()
+    protected function getBundle(): BundleInterface
     {
-        $bundle = $this->getMock('Symfony\Component\HttpKernel\Bundle\BundleInterface');
-        $bundle->expects($this->any())->method('getPath')->will($this->returnValue($this->tmpDir));
-        $bundle->expects($this->any())->method('getName')->will($this->returnValue('FooBarBundle'));
-        $bundle->expects($this->any())->method('getNamespace')->will($this->returnValue('Foo\BarBundle'));
+        $bundle = $this->getMock(BundleInterface::class);
+        $bundle->method('getPath')->willReturn($this->tmpDir);
+        $bundle->method('getName')->willReturn('FooBarBundle');
+        $bundle->method('getNamespace')->willReturn('Foo\BarBundle');
 
         return $bundle;
     }

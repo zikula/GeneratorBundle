@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -12,14 +14,16 @@
 namespace Sensio\Bundle\GeneratorBundle\Tests\Command;
 
 use Symfony\Component\Console\Tester\CommandTester;
-use Sensio\Bundle\GeneratorBundle\Command\GenerateDoctrineEntityCommand;
+use Zikula\Bundle\GeneratorBundle\Command\GenerateDoctrineEntityCommand;
+use Zikula\Bundle\GeneratorBundle\Generator\DoctrineEntityGenerator;
+use Zikula\Bundle\GeneratorBundle\Generator\Generator;
 
 class GenerateDoctrineEntityCommandTest extends GenerateCommandTest
 {
     /**
      * @dataProvider getInteractiveCommandData
      */
-    public function testInteractiveCommand($options, $input, $expected)
+    public function testInteractiveCommand($options, $input, $expected): void
     {
         list($entity, $format, $fields) = $expected;
 
@@ -34,7 +38,7 @@ class GenerateDoctrineEntityCommandTest extends GenerateCommandTest
         $tester->execute($options);
     }
 
-    public function getInteractiveCommandData()
+    public function getInteractiveCommandData(): array
     {
         return [
             [[], "AcmeBlogBundle:Blog/Post\n", ['Blog\\Post', 'annotation', []]],
@@ -50,7 +54,7 @@ class GenerateDoctrineEntityCommandTest extends GenerateCommandTest
     /**
      * @dataProvider getNonInteractiveCommandData
      */
-    public function testNonInteractiveCommand($options, $expected)
+    public function testNonInteractiveCommand($options, $expected): void
     {
         list($entity, $format, $fields) = $expected;
 
@@ -61,16 +65,15 @@ class GenerateDoctrineEntityCommandTest extends GenerateCommandTest
             ->with($this->getBundle(), $entity, $format, $fields)
         ;
         $generator
-            ->expects($this->any())
             ->method('isReservedKeyword')
-            ->will($this->returnValue(false))
+            ->willReturn(false)
         ;
 
         $tester = new CommandTester($this->getCommand($generator, ''));
         $tester->execute($options, ['interactive' => false]);
     }
 
-    public function getNonInteractiveCommandData()
+    public function getNonInteractiveCommandData(): array
     {
         return [
             [['--entity' => 'AcmeBlogBundle:Blog/Post'], ['Blog\\Post', 'annotation', []]],
@@ -81,7 +84,7 @@ class GenerateDoctrineEntityCommandTest extends GenerateCommandTest
         ];
     }
 
-    protected function getCommand($generator, $input)
+    protected function getCommand($generator, $input): GenerateDoctrineEntityCommand
     {
         $command = new GenerateDoctrineEntityCommand();
         $command->setContainer($this->getContainer());
@@ -91,11 +94,11 @@ class GenerateDoctrineEntityCommandTest extends GenerateCommandTest
         return $command;
     }
 
-    protected function getGenerator()
+    protected function getGenerator(): Generator
     {
         // get a noop generator
         return $this
-            ->getMockBuilder('Sensio\Bundle\GeneratorBundle\Generator\DoctrineEntityGenerator')
+            ->getMockBuilder(DoctrineEntityGenerator::class)
             ->disableOriginalConstructor()
             ->setMethods(['generate', 'isReservedKeyword'])
             ->getMock()

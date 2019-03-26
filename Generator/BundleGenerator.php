@@ -1,5 +1,7 @@
 <?php
 
+declare(strict_types=1);
+
 /*
  * This file is part of the Symfony package.
  *
@@ -11,7 +13,7 @@
 
 namespace Zikula\Bundle\GeneratorBundle\Generator;
 
-use Symfony\Component\Filesystem\Filesystem;
+use RuntimeException;
 use Symfony\Component\DependencyInjection\Container;
 use Zikula\Bundle\CoreBundle\HttpKernel\ZikulaKernel;
 
@@ -22,26 +24,19 @@ use Zikula\Bundle\CoreBundle\HttpKernel\ZikulaKernel;
  */
 class BundleGenerator extends Generator
 {
-    private $filesystem;
-
-    public function __construct(Filesystem $filesystem)
+    public function generate(string $namespace, string $bundle, string $dir, string $format, string $license = 'MIT'): void
     {
-        $this->filesystem = $filesystem;
-    }
-
-    public function generate($namespace, $bundle, $dir, $format, $license = 'MIT')
-    {
-        $dir .= '/'.strtr($namespace, '\\', '/');
+        $dir .= '/'. str_replace('\\', '/', $namespace);
         if (file_exists($dir)) {
             if (!is_dir($dir)) {
-                throw new \RuntimeException(sprintf('Unable to generate the module as the target directory "%s" exists but is a file.', realpath($dir)));
+                throw new RuntimeException(sprintf('Unable to generate the module as the target directory "%s" exists but is a file.', realpath($dir)));
             }
-            $files = scandir($dir);
-            if ($files != ['.', '..']) {
-                throw new \RuntimeException(sprintf('Unable to generate the module as the target directory "%s" is not empty.', realpath($dir)));
+            $files = scandir($dir, SCANDIR_SORT_NONE);
+            if ($files !== ['.', '..']) {
+                throw new RuntimeException(sprintf('Unable to generate the module as the target directory "%s" is not empty.', realpath($dir)));
             }
             if (!is_writable($dir)) {
-                throw new \RuntimeException(sprintf('Unable to generate the module as the target directory "%s" is not writable.', realpath($dir)));
+                throw new RuntimeException(sprintf('Unable to generate the module as the target directory "%s" is not writable.', realpath($dir)));
             }
         }
 
